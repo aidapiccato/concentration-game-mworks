@@ -1,0 +1,53 @@
+%define n_cards_max = 36
+
+group 'Stimulus variables' {
+    var card_index (scope = local; default_value = 0)
+    var br = 0.5
+    var bg = 0.5
+    var bb = 0.5
+    var stim_size = 4
+    var x_offset = 0
+    var y_offset = 0
+    var stim_dist = 2
+}
+
+
+%define for_each_card ()
+    range_replicator (
+        variable = card_index
+        from = 0
+        to = n_cards_max - 1
+        step = 1
+    )
+%end
+
+%define card_x_index = floor(${card_index} / grid_dims[1])
+%define card_y_index = ${card_index} % grid_dims[0]
+
+%define max_card_x = grid_dims[0] * stim_size / 2
+%define max_card_y = grid_dims[1] * stim_size / 2
+%define card_x_pos = card_x_index + card_x_index * stim_size - max_card_x
+%define card_y_pos = card_y_index + card_y_index * stim_size - max_card_y
+
+%define card_visible = ${card_index} < (n_pairs * 2)
+
+stimulus_group card_mask_stims {
+    for_each_card {
+        rectangle 'card_mask_stim_${card_index}' (
+            color = 0.25, 0.25, 0.25
+            x_size = stim_size
+            y_size = stim_size
+            y_position = card_y_pos
+            x_position = card_x_pos
+            alpha_multiplier = card_visible
+        )
+    }
+}
+
+%define display_card_masks ()
+    for_each_card {
+        list {
+            live_queue_stimulus(card_mask_stims[card_index])
+        }
+    }
+%end

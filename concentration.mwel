@@ -1,0 +1,133 @@
+
+
+group 'Configuration variables' {
+    var n_pairs = 8
+    var grid_dims = [4, 4]
+    var feedback = 0
+    var grid = [0, 0, 0, 0]
+    var n_success = 0
+    var n_ignore = 0
+    var n_failure = 0
+}
+
+%include 'concentration-stim'
+
+stimulus_display (
+    background_color = br, bg, bb
+    redraw_on_every_refresh = true
+    announce_stimuli_on_implicit_updates = false
+)
+
+group 'Experiment variables' {
+    var n_blocks = 3                // number of configurations shown in session
+    var n_trials_per_block = 200    // number of trials per configuration
+}
+
+
+
+group 'Timer duration variables' {
+    var choice_dur = 3s
+    var feedback_dur = 1s
+}
+
+group 'Python variables' {
+    var py_n_pairs = 0
+    var py_grid_dims = [0, 0]
+    var py_feedback = 0
+    var py_grid = [0, 0, 0, 0]
+    var py_card_a = 0
+}
+
+group 'Trial variables' {
+    var card_a = 0
+    var card_b = 0
+    var success = 0
+    var failure = 0
+    var ignore = 0
+    var card_b_selected = -1
+}
+
+var sync = 0
+
+%define update_config_meta ()
+   run_python_string(get_config_metaparameters())
+   n_pairs = py_n_pairs
+   grid_dims = py_grid_dims
+   feedback = py_feedback
+   grid = py_grid
+%end
+
+%define reset_trial_vars ()
+    sucess = 0
+    failure = 0
+    ignore = 0
+    card_b_selected = -1
+%end
+
+%define update_trial_meta ()
+    run_python_string(get_trial_metaparameters())
+    card_a = py_card_a
+%end
+
+protocol 'Concentration' {
+
+    run_python_file ('utils.py')
+
+    block (nsamples=n_blocks) {
+        update_config_meta ()
+       display_card_masks ()
+        update_display ()
+        trial (nsamples=n_trials_per_block) {
+            sync = 0
+            update_trial_meta ()
+            task {
+                state 'Trial start' {
+                    report ('***TRIAL START***')
+                    goto (
+                        target = 'Flip first card'
+                    )
+                }
+                state 'Flip first card' {
+                    report ('***FLIP FIRST CARD***')
+                    start_timer (
+                        timer = choice_timer
+                        duration = choice_dur
+                    )
+                    goto (
+                        target = 'Flip second card'
+                        when = card_b_selected
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (choice_timer)
+                    )
+                }
+                state 'Flip second card' {
+                    report ('***FLIP SECOND CARD***')
+                    start_timer (
+                        timer = feedback_timer
+                        duration = feedback_dur
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (feedback_timer)
+                    )
+                }
+                state 'Trial end' {
+                    report ('***TRIAL END***')
+
+                    if (card_b_selected == -1) {
+                        ignore = 1
+                    }
+
+                    n_success = n_success + success
+                    n_failure = n_failure + failure
+                    n_ignore = n_ignore + ignore
+
+                    yield ()
+                }
+
+            }
+        }
+    }
+}
