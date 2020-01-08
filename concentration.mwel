@@ -1,15 +1,30 @@
-
-
 group 'Configuration variables' {
     var n_pairs = 8
     var grid_dims = [4, 4]
     var feedback = 0
     var grid = [0, 0, 0, 0]
+    var inv_grid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     var n_success = 0
     var n_ignore = 0
     var n_failure = 0
 }
 
+group 'Sync variables' {
+    var TRIAL_START = 0
+    var FLIP_CARD_A = 1
+    var FLIP_CARD_B = 2
+    var TRIAL_END = 3
+}
+group 'Trial variables' {
+    var card_a = 0
+    var card_b = 0
+    var success = 0
+    var failure = 0
+    var ignore = 0
+}
+
+%include 'concentration-targets'
+%include 'concentration-io'
 %include 'concentration-stim'
 
 stimulus_display (
@@ -23,11 +38,10 @@ group 'Experiment variables' {
     var n_trials_per_block = 200    // number of trials per configuration
 }
 
-
-
 group 'Timer duration variables' {
-    var choice_dur = 3s
-    var feedback_dur = 1s
+    var choice_dur = 5s
+    var feedback_dur = 2s
+    var iti_dur = 2s
 }
 
 group 'Python variables' {
@@ -35,17 +49,10 @@ group 'Python variables' {
     var py_grid_dims = [0, 0]
     var py_feedback = 0
     var py_grid = [0, 0, 0, 0]
+    var py_inv_grid = [0, 0, 0, 0]
     var py_card_a = 0
 }
 
-group 'Trial variables' {
-    var card_a = 0
-    var card_b = 0
-    var success = 0
-    var failure = 0
-    var ignore = 0
-    var card_b_selected = -1
-}
 
 var sync = 0
 
@@ -55,13 +62,16 @@ var sync = 0
    grid_dims = py_grid_dims
    feedback = py_feedback
    grid = py_grid
+   inv_grid = py_inv_grid
 %end
 
+
 %define reset_trial_vars ()
-    sucess = 0
+    success = 0
     failure = 0
-    ignore = 0
-    card_b_selected = -1
+    ignore = 1
+    card_b = 0
+    move_mouse_cursor (device=pointer; x_position=0; y_position=0)
 %end
 
 %define update_trial_meta ()
@@ -69,33 +79,54 @@ var sync = 0
     card_a = py_card_a
 %end
 
+
+%define evaluate ()
+    ignore = ignore or card_a == card_b
+    if (! ignore) {
+        success = grid[card_b] == grid[card_a]
+        failure = !success
+    }
+%end
+
+
 protocol 'Concentration' {
 
+    start_io_device (pointer)
     run_python_file ('utils.py')
 
     block (nsamples=n_blocks) {
         update_config_meta ()
-       display_card_masks ()
+        display_targets ()
+        display_images ()
         update_display ()
+
         trial (nsamples=n_trials_per_block) {
-            sync = 0
+            reset_trial_vars ()
+
+            sync = TRIAL_START
+
             update_trial_meta ()
+
             task {
                 state 'Trial start' {
                     report ('***TRIAL START***')
+                    sync = TRIAL_START
+                    wait (iti_dur)
                     goto (
                         target = 'Flip first card'
                     )
                 }
                 state 'Flip first card' {
                     report ('***FLIP FIRST CARD***')
+                    sync = FLIP_CARD_A
                     start_timer (
                         timer = choice_timer
                         duration = choice_dur
                     )
+
                     goto (
                         target = 'Flip second card'
-                        when = card_b_selected
+                        when = card_selected
                     )
                     goto (
                         target = 'Trial end'
@@ -104,6 +135,10 @@ protocol 'Concentration' {
                 }
                 state 'Flip second card' {
                     report ('***FLIP SECOND CARD***')
+                    sync = FLIP_CARD_B
+                    ignore = 0
+                    read_card_selection ()
+                    evaluate ()
                     start_timer (
                         timer = feedback_timer
                         duration = feedback_dur
@@ -115,15 +150,11 @@ protocol 'Concentration' {
                 }
                 state 'Trial end' {
                     report ('***TRIAL END***')
-
-                    if (card_b_selected == -1) {
-                        ignore = 1
-                    }
+                    sync = TRIAL_END
 
                     n_success = n_success + success
                     n_failure = n_failure + failure
                     n_ignore = n_ignore + ignore
-
                     yield ()
                 }
 

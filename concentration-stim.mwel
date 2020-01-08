@@ -1,7 +1,8 @@
-%define n_cards_max = 36
-
+%define n_cards_max = 16
+%define n_images = 16
 group 'Stimulus variables' {
     var card_index (scope = local; default_value = 0)
+    var image_index (scope = local; default_value = 0)
     var br = 0.5
     var bg = 0.5
     var bb = 0.5
@@ -11,6 +12,13 @@ group 'Stimulus variables' {
     var stim_dist = 2
 }
 
+%define display_images ()
+    for_each_image {
+        list {
+            live_queue_stimulus (card_image_stims[image_index])
+        }
+    }
+%end
 
 %define for_each_card ()
     range_replicator (
@@ -21,33 +29,80 @@ group 'Stimulus variables' {
     )
 %end
 
-%define card_x_index = floor(${card_index} / grid_dims[1])
-%define card_y_index = ${card_index} % grid_dims[0]
+%define for_each_image ()
+    range_replicator (
+        variable = image_index
+        from = 0
+        to = n_images - 1
+        step = 1
+    )
+%end
 
-%define max_card_x = grid_dims[0] * stim_size / 2
-%define max_card_y = grid_dims[1] * stim_size / 2
-%define card_x_pos = card_x_index + card_x_index * stim_size - max_card_x
-%define card_y_pos = card_y_index + card_y_index * stim_size - max_card_y
 
-%define card_visible = ${card_index} < (n_pairs * 2)
+%define card_x_index_f (index) index % grid_dims[1]
+%define card_y_index_f (index) floor(index / grid_dims[1]) * -1 // multiply by -1 so that lower-index rows will be on the top
 
-stimulus_group card_mask_stims {
-    for_each_card {
-        rectangle 'card_mask_stim_${card_index}' (
-            color = 0.25, 0.25, 0.25
-            x_size = stim_size
-            y_size = stim_size
-            y_position = card_y_pos
-            x_position = card_x_pos
-            alpha_multiplier = card_visible
-        )
+%define card_x_index = ${card_index} % grid_dims[1]
+%define card_y_index = floor(${card_index} / grid_dims[1]) * -1 // multiply by -1 so that lower-index rows will be on the top
+
+%define x_offset = (grid_dims[1]/2  - 0.5) * stim_size + (grid_dims[1]/2 - 0.5) * stim_dist
+%define y_offset = (grid_dims[0]/2 - 0.5)  * stim_size + (grid_dims[0]/2 - 0.5) * stim_dist
+
+%define card_x_pos_f (index)  (card_x_index_f (index)) * (stim_size) + (card_x_index_f (index)) * (stim_dist) - x_offset
+%define card_y_pos_f (index)  (card_y_index_f (index)) * (stim_size) + (card_y_index_f (index)) * (stim_dist) + y_offset
+
+%define card_x_pos =  (card_x_index) * (stim_size) + (card_x_index) * (stim_dist) // - x_offset
+%define card_y_pos =  (card_y_index) * (stim_size) + (card_y_index) * (stim_dist) // + y_offset
+
+%define image_x_pos = card_x_pos_f (inv_grid[${image_index}])
+%define image_y_pos = card_y_pos_f (inv_grid[${image_index}])
+
+%define image_visible = (inv_grid[${image_index}] < n_pairs * 2 and inv_grid[${image_index} != 1]) and ((card_a == inv_grid[${image_index}] and sync >= FLIP_CARD_A) or (card_b == inv_grid[${image_index}] and sync >= FLIP_CARD_B))
+
+stimulus_group card_image_stims {
+    for_each_image {
+         image_file 'img_stim_${image_index}' (
+                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/images/${image_index}.jpg"
+                x_size = stim_size
+                x_position = image_x_pos
+                y_position = image_y_pos
+                alpha_multiplier = image_visible
+         )
     }
 }
 
-%define display_card_masks ()
-    for_each_card {
-        list {
-            live_queue_stimulus(card_mask_stims[card_index])
-        }
-    }
+target target0 (x_position = card_x_pos_f (0); y_position = card_y_pos_f (0); trigger_flag = trigger_flag0; index = 0)
+target target1 (x_position = card_x_pos_f (1); y_position = card_y_pos_f (1); trigger_flag = trigger_flag1; index = 1)
+target target2 (x_position = card_x_pos_f (2); y_position = card_y_pos_f (2); trigger_flag = trigger_flag2; index = 2)
+target target3 (x_position = card_x_pos_f (3); y_position = card_y_pos_f (3); trigger_flag = trigger_flag3; index = 3)
+target target4 (x_position = card_x_pos_f (4); y_position = card_y_pos_f (4); trigger_flag = trigger_flag4; index = 4)
+target target5 (x_position = card_x_pos_f (5); y_position = card_y_pos_f (5); trigger_flag = trigger_flag5; index = 5)
+target target6 (x_position = card_x_pos_f (6); y_position = card_y_pos_f (6); trigger_flag = trigger_flag6; index = 6)
+target target7 (x_position = card_x_pos_f (7); y_position = card_y_pos_f (7); trigger_flag = trigger_flag7; index = 7)
+target target8 (x_position = card_x_pos_f (8); y_position = card_y_pos_f (8); trigger_flag = trigger_flag8; index = 8)
+target target9 (x_position = card_x_pos_f (9); y_position = card_y_pos_f (9); trigger_flag = trigger_flag9; index = 9)
+target target10 (x_position = card_x_pos_f (10); y_position = card_y_pos_f (10); trigger_flag = trigger_flag10; index = 10)
+target target11 (x_position = card_x_pos_f (11); y_position = card_y_pos_f (11); trigger_flag = trigger_flag11; index = 11)
+target target12 (x_position = card_x_pos_f (12); y_position = card_y_pos_f (12); trigger_flag = trigger_flag12; index = 12)
+target target13 (x_position = card_x_pos_f (13); y_position = card_y_pos_f (13); trigger_flag = trigger_flag13; index = 13)
+target target14 (x_position = card_x_pos_f (14); y_position = card_y_pos_f (14); trigger_flag = trigger_flag14; index = 14)
+target target15 (x_position = card_x_pos_f (15); y_position = card_y_pos_f (15); trigger_flag = trigger_flag15; index = 15)
+
+%define display_targets ()
+    live_queue_stimulus (target0)
+    live_queue_stimulus (target1)
+    live_queue_stimulus (target2)
+    live_queue_stimulus (target3)
+    live_queue_stimulus (target4)
+    live_queue_stimulus (target5)
+    live_queue_stimulus (target6)
+    live_queue_stimulus (target7)
+    live_queue_stimulus (target8)
+    live_queue_stimulus (target9)
+    live_queue_stimulus (target10)
+    live_queue_stimulus (target11)
+    live_queue_stimulus (target12)
+    live_queue_stimulus (target13)
+    live_queue_stimulus (target14)
+    live_queue_stimulus (target15)
 %end
