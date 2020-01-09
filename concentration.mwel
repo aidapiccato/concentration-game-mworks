@@ -8,13 +8,17 @@ group 'Configuration variables' {
     var n_ignore = 0
     var n_failure = 0
     var feedback = 1
+    var n_trials = 0
 }
 
+var sync = 0
+
 group 'Sync variables' {
-    var TRIAL_START = 0
-    var FLIP_CARD_A = 1
-    var FLIP_CARD_B = 2
-    var TRIAL_END = 3
+    var TRIAL_INIT = 1
+    var FLIP_CARD_A = 2
+    var FLIP_CARD_B = 3
+    var FEEDBACK = 4
+    var TRIAL_END = 5
 }
 
 group 'Trial variables' {
@@ -25,7 +29,6 @@ group 'Trial variables' {
     var ignore = 0
 }
 
-%include 'concentration-targets'
 %include 'concentration-io'
 %include 'concentration-stim'
 
@@ -36,8 +39,8 @@ stimulus_display (
 )
 
 group 'Experiment variables' {
-    var n_blocks = 3                // number of configurations shown in session
-    var n_trials_per_block = 200    // number of trials per configuration
+    var n_blocks = 10                // number of configurations shown in session
+    var n_cycles = 10                // number of times a configuration is repeated
 }
 
 group 'Timer duration variables' {
@@ -55,25 +58,30 @@ group 'Python variables' {
     var py_card_a = 0
 }
 
-var sync = 0
+
 
 %define update_config_meta ()
    run_python_string(get_config_metaparameters())
    n_pairs = py_n_pairs
    grid_dims = py_grid_dims
-   feedback = py_feedback
    grid = py_grid
    inv_grid = py_inv_grid
 %end
 
+%define reset_block_vars ()
+    flipped = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    n_trials = 0
+%end
 
+%define inc_trials ()
+    n_trials = n_trials + 1
+%end
 %define reset_trial_vars ()
     success = 0
     failure = 0
     ignore = 1
     card_b = 0
     move_mouse_cursor (device=pointer; x_position=0; y_position=0)
-
 %end
 
 %define update_trial_meta ()
@@ -97,91 +105,216 @@ var sync = 0
     }
 %end
 
-protocol 'Concentration' {
+var selection_card_a (scope = local; default_value = 0)
 
+protocol 'Concentration - No feedback' {
     start_io_device (pointer)
     run_python_file ('utils.py')
-
-    block (nsamples=n_blocks) {
+    feedback = 0
+    block (nsamples = 3) {
         report ('***NEW BLOCK***')
+
+        reset_block_vars ()
+
         update_config_meta ()
         display_images ()
         display_targets ()
 
         update_display ()
 
-        trial (nsamples=n_trials_per_block) {
-            reset_trial_vars ()
+        list trial_list (nsamples=n_cycles; sampling_method=cycles; selection=random_with_replacement) {
+            range_replicator (
+                variable = selection_card_a
+                from = 0
+                to = n_cards_max - 1
+                step = 1
+            ) {
+                 trial {
+                        task {
+                            state 'Transition' {
+                                sync = 0
+                                goto (
+                                    target = 'Yield'
+                                    when = selection_card_a >= n_pairs * 2
+                                )
+                                goto ( 'Intertrial interval' )
+                            }
+                            state 'Intertrial interval' {
+                                reset_trial_vars ()
+                                wait (iti_dur)
+                                goto ('Trial init')
+                            }
+                            state 'Trial init' {
+                                report ('TRIAL INIT')
+                                sync = TRIAL_INIT
+                                inc_trials ()
+                                card_a = selection_card_a
+                                goto ( 'Flip first card' )
+                            }
+                            state 'Flip first card' {
+                                report ('FLIP FIRST CARD')
+                                sync = FLIP_CARD_A
+                                start_timer (
+                                    timer = choice_timer
+                                    duration = choice_dur
+                                )
+                                goto (
+                                    target = 'Flip second card'
+                                    when = card_selected
+                                )
+                                goto (
+                                    target = 'Trial end'
+                                    when = timer_expired (choice_timer)
+                                )
+                            }
+                            state 'Flip second card' {
+                                report ('***FLIP SECOND CARD***')
+                                sync = FLIP_CARD_B
+                                ignore = 0
+                                read_card_selection ()
+                                evaluate ()
+                                goto ( 'Feedback' )
+                            }
+                            state 'Feedback' {
+                                sync = FEEDBACK
+                                start_timer (
+                                    timer = feedback_timer
+                                    duration = feedback_dur
+                                )
+                                goto (
+                                    target = 'Trial end'
+                                    when = timer_expired (feedback_timer)
+                                )
+                            }
+                            state 'Trial end' {
+                                report ('***TRIAL END***')
+                                sync = TRIAL_END
 
-            sync = TRIAL_START
+                                n_success = n_success + success
+                                n_failure = n_failure + failure
+                                n_ignore = n_ignore + ignore
 
-            update_trial_meta ()
+                                if (success) {
+                                    accept_selections (trial_list)
+                                }
+                                if (ignore or failure) {
+                                    reject_selections (trial_list)
+                                }
+                                yield ()
+                            }
+                            state 'Yield' {
+                                accept_selections (trial_list)
+                                yield ()
+                            }
+                        }
+                 }
+            }
+        }
+    }
+}
 
-            task {
-                state 'Trial check' {
-                    goto (
-                        target = 'Block end'
-                        when = card_a == -1
-                    )
-                    goto (
-                        target = 'Trial start'
-                    )
-                }
-                state 'Block end' {
-                    yield ()
-                }
-                state 'Trial start' {
+protocol 'Concentration - Feedback' {
+    start_io_device (pointer)
+    run_python_file ('utils.py')
+    feedback = 1
+    block (nsamples = 3) {
+        report ('***NEW BLOCK***')
 
-                    report ('***TRIAL START***')
-                    sync = TRIAL_START
+        reset_block_vars ()
 
-                    wait (iti_dur)
-                    goto (
-                        target = 'Flip first card'
-                    )
-                }
-                state 'Flip first card' {
-                    report ('***FLIP FIRST CARD***')
-                    sync = FLIP_CARD_A
-                    start_timer (
-                        timer = choice_timer
-                        duration = choice_dur
-                    )
+        update_config_meta ()
+        display_images ()
+        display_targets ()
 
-                    goto (
-                        target = 'Flip second card'
-                        when = card_selected
-                    )
-                    goto (
-                        target = 'Trial end'
-                        when = timer_expired (choice_timer)
-                    )
-                }
-                state 'Flip second card' {
-                    report ('***FLIP SECOND CARD***')
-                    sync = FLIP_CARD_B
-                    ignore = 0
-                    read_card_selection ()
-                    evaluate ()
-                    start_timer (
-                        timer = feedback_timer
-                        duration = feedback_dur
-                    )
-                    goto (
-                        target = 'Trial end'
-                        when = timer_expired (feedback_timer)
-                    )
-                }
-                state 'Trial end' {
-                    report ('***TRIAL END***')
-                    sync = TRIAL_END
+        update_display ()
 
-                    n_success = n_success + success
-                    n_failure = n_failure + failure
-                    n_ignore = n_ignore + ignore
-                    yield ()
-                }
+        list trial_list (selection = random_without_replacement) {
+            range_replicator (
+                variable = selection_card_a
+                from = 0
+                to = n_cards_max - 1
+                step = 1
+            ) {
+                 trial {
+                        task {
+                            state 'Transition' {
+                                sync = 0
+                                goto (
+                                    target = 'Yield'
+                                    when = selection_card_a >= n_pairs * 2 or flipped[selection_card_a]
+                                )
+                                goto ( 'Intertrial interval' )
+                            }
+                            state 'Intertrial interval' {
+                                reset_trial_vars ()
+                                wait (iti_dur)
+                                goto ('Trial init')
+                            }
+                            state 'Trial init' {
+                                report ('TRIAL INIT')
+                                sync = TRIAL_INIT
+                                inc_trials ()
+                                card_a = selection_card_a
+                                goto ( 'Flip first card' )
+                            }
+                            state 'Flip first card' {
+                                report ('FLIP FIRST CARD')
+                                sync = FLIP_CARD_A
+                                start_timer (
+                                    timer = choice_timer
+                                    duration = choice_dur
+                                )
 
+                                goto (
+                                    target = 'Flip second card'
+                                    when = card_selected
+                                )
+                                goto (
+                                    target = 'Trial end'
+                                    when = timer_expired (choice_timer)
+                                )
+                            }
+                            state 'Flip second card' {
+                                report ('***FLIP SECOND CARD***')
+                                sync = FLIP_CARD_B
+                                ignore = 0
+                                read_card_selection ()
+                                evaluate ()
+                                goto ( 'Feedback' )
+                            }
+                            state 'Feedback' {
+                                sync = FEEDBACK
+                                start_timer (
+                                    timer = feedback_timer
+                                    duration = feedback_dur
+                                )
+                                goto (
+                                    target = 'Trial end'
+                                    when = timer_expired (feedback_timer)
+                                )
+                            }
+                            state 'Trial end' {
+                                report ('***TRIAL END***')
+                                sync = TRIAL_END
+
+                                n_success = n_success + success
+                                n_failure = n_failure + failure
+                                n_ignore = n_ignore + ignore
+
+                                if (success) {
+                                    accept_selections (trial_list)
+                                }
+                                if (ignore or failure) {
+                                    reject_selections (trial_list)
+                                }
+                                yield ()
+                            }
+                            state 'Yield' {
+                                accept_selections (trial_list)
+                                yield ()
+                            }
+                        }
+                 }
             }
         }
     }

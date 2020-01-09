@@ -5,7 +5,7 @@ MAX_N_PAIRS = 8
 CONFIGS = { # mapping number of pairs to possible configurations
     2: [[2, 2]],
     4: [[2, 4]],
-    8: [[4, 4], [2, 8]]
+    8: [[4, 4]]
 }
 ALL_N_PAIRS = [2, 4, 8] # possible number of pairs in a configuration
 
