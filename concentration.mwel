@@ -1,12 +1,13 @@
 group 'Configuration variables' {
     var n_pairs = 8
     var grid_dims = [4, 4]
-    var feedback = 0
     var grid = [0, 0, 0, 0]
     var inv_grid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    var flipped = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     var n_success = 0
     var n_ignore = 0
     var n_failure = 0
+    var feedback = 1
 }
 
 group 'Sync variables' {
@@ -15,6 +16,7 @@ group 'Sync variables' {
     var FLIP_CARD_B = 2
     var TRIAL_END = 3
 }
+
 group 'Trial variables' {
     var card_a = 0
     var card_b = 0
@@ -53,7 +55,6 @@ group 'Python variables' {
     var py_card_a = 0
 }
 
-
 var sync = 0
 
 %define update_config_meta ()
@@ -72,6 +73,7 @@ var sync = 0
     ignore = 1
     card_b = 0
     move_mouse_cursor (device=pointer; x_position=0; y_position=0)
+
 %end
 
 %define update_trial_meta ()
@@ -79,6 +81,10 @@ var sync = 0
     card_a = py_card_a
 %end
 
+%define mark_as_flipped ()
+    flipped[card_a] = 1
+    flipped[card_b] = 1
+%end
 
 %define evaluate ()
     ignore = ignore or card_a == card_b
@@ -86,8 +92,10 @@ var sync = 0
         success = grid[card_b] == grid[card_a]
         failure = !success
     }
+    if (feedback and success) {
+        mark_as_flipped ()
+    }
 %end
-
 
 protocol 'Concentration' {
 
@@ -95,9 +103,11 @@ protocol 'Concentration' {
     run_python_file ('utils.py')
 
     block (nsamples=n_blocks) {
+        report ('***NEW BLOCK***')
         update_config_meta ()
-        display_targets ()
         display_images ()
+        display_targets ()
+
         update_display ()
 
         trial (nsamples=n_trials_per_block) {
@@ -108,9 +118,23 @@ protocol 'Concentration' {
             update_trial_meta ()
 
             task {
+                state 'Trial check' {
+                    goto (
+                        target = 'Block end'
+                        when = card_a == -1
+                    )
+                    goto (
+                        target = 'Trial start'
+                    )
+                }
+                state 'Block end' {
+                    yield ()
+                }
                 state 'Trial start' {
+
                     report ('***TRIAL START***')
                     sync = TRIAL_START
+
                     wait (iti_dur)
                     goto (
                         target = 'Flip first card'

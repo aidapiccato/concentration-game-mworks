@@ -1,6 +1,9 @@
 %include 'concentration-io'
 %define target_color = 0.25 - (sync >= FLIP_CARD_A) * 0.1
-%define target_visible (index) index < (n_pairs * 2)
+
+%define is_card_b_and_vis (index)  (card_b == index and sync >= FLIP_CARD_B)
+%define is_card_a_and_vis (index)  (card_a == index and sync >= FLIP_CARD_A)
+%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index))
 
 %define target (x_position, y_position, trigger_flag, index)
     fixation_point (

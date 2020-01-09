@@ -57,7 +57,7 @@ group 'Stimulus variables' {
 %define image_x_pos = card_x_pos_f (inv_grid[${image_index}])
 %define image_y_pos = card_y_pos_f (inv_grid[${image_index}])
 
-%define image_visible = (inv_grid[${image_index}] < n_pairs * 2 and inv_grid[${image_index} != 1]) and ((card_a == inv_grid[${image_index}] and sync >= FLIP_CARD_A) or (card_b == inv_grid[${image_index}] and sync >= FLIP_CARD_B))
+%define image_visible = inv_grid[${image_index}] != -1
 
 stimulus_group card_image_stims {
     for_each_image {
