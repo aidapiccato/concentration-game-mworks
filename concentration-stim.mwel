@@ -1,7 +1,6 @@
 %include 'concentration-io'
 
-%define n_cards_max = 16
-%define n_images = 16
+%define n_cards_max = 36
 
 group 'Stimulus variables' {
     var card_index (scope = local; default_value = 0)
@@ -15,14 +14,6 @@ group 'Stimulus variables' {
     var stim_dist = 2
 }
 
-%define display_images ()
-    for_each_image {
-        list {
-            live_queue_stimulus (card_image_stims[image_index])
-        }
-    }
-%end
-
 %define for_each_card ()
     range_replicator (
         variable = card_index
@@ -32,14 +23,7 @@ group 'Stimulus variables' {
     )
 %end
 
-%define for_each_image ()
-    range_replicator (
-        variable = image_index
-        from = 0
-        to = n_images - 1
-        step = 1
-    )
-%end
+
 
 
 %define card_x_index_f (index) index % grid_dims[1]
@@ -62,10 +46,19 @@ group 'Stimulus variables' {
 
 %define image_visible = inv_grid[${image_index}] != -1
 
+%define for_each_image ()
+    range_replicator (
+        variable = image_index
+        from = 0
+        to = 35
+        step = 1
+    )
+%end
+
 stimulus_group card_image_stims {
     for_each_image {
          image_file 'img_stim_${image_index}' (
-                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/images/${image_index}.jpg"
+                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
                 x_size = stim_size
                 x_position = image_x_pos
                 y_position = image_y_pos
@@ -74,12 +67,27 @@ stimulus_group card_image_stims {
     }
 }
 
+%define display_images ()
+    for_each_image {
+        list {
+            live_queue_stimulus (card_image_stims[image_index])
+        }
+    }
+%end
+
+%define dequeue_images ()
+    for_each_image {
+        list {
+            dequeue_stimulus (card_image_stims[image_index])
+        }
+    }
+%end
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////// Target declarations
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-%define target_color = 0.25 - (sync >= FLIP_CARD_A and sync < FEEDBACK) * 0.1
+%define target_color = 0.25
 
 %define is_card_b_and_vis (index)  (card_b == index and sync >= FLIP_CARD_B)
 %define is_card_a_and_vis (index)  (card_a == index and sync >= FLIP_CARD_A)
@@ -100,50 +108,95 @@ stimulus_group card_image_stims {
 %end
 
 group 'Trigger flag variables' {
-    var trigger_flag0 = 0
-    var trigger_flag1 = 0
-    var trigger_flag2 = 0
-    var trigger_flag3 = 0
-    var trigger_flag4 = 0
-    var trigger_flag5 = 0
-    var trigger_flag6 = 0
-    var trigger_flag7 = 0
-    var trigger_flag8 = 0
-    var trigger_flag9 = 0
-    var trigger_flag10 = 0
-    var trigger_flag11 = 0
-    var trigger_flag12 = 0
-    var trigger_flag13 = 0
-    var trigger_flag14 = 0
-    var trigger_flag15 = 0
+    var tf0 = 0
+    var tf1 = 0
+    var tf2 = 0
+    var tf3 = 0
+    var tf4 = 0
+    var tf5 = 0
+    var tf6 = 0
+    var tf7 = 0
+    var tf8 = 0
+    var tf9 = 0
+    var tf10 = 0
+    var tf11 = 0
+    var tf12 = 0
+    var tf13 = 0
+    var tf14 = 0
+    var tf15 = 0
+    var tf16 = 0
+    var tf17 = 0
+    var tf18 = 0
+    var tf19 = 0
+    var tf20 = 0
+    var tf21 = 0
+    var tf22 = 0
+    var tf23 = 0
+    var tf24 = 0
+    var tf25 = 0
+    var tf26 = 0
+    var tf27 = 0
+    var tf28 = 0
+    var tf29 = 0
+    var tf30 = 0
+    var tf31 = 0
+    var tf32 = 0
+    var tf33 = 0
+    var tf34 = 0
+    var tf35 = 0
+
+
 }
-var trigger_flags = [trigger_flag0, trigger_flag1, trigger_flag2, trigger_flag3, trigger_flag4, trigger_flag5,
-    trigger_flag6, trigger_flag7, trigger_flag8, trigger_flag9, trigger_flag10,
-    trigger_flag11, trigger_flag12, trigger_flag13, trigger_flag14, trigger_flag15]
+var tfs = [tf0, tf1, tf2, tf3, tf4, tf5,
+    tf6, tf7, tf8, tf9, tf10,
+    tf11, tf12, tf13, tf14, tf15,
+    tf16, tf17, tf18, tf19, tf20, tf21, tf22, tf23,
+    tf24, tf25, tf26, tf27, tf28, tf29, tf30, tf31,
+    tf32, tf33, tf34, tf35 ]
 
 %define read_card_selection ()
-    card_b = 0 * trigger_flag0 + 1 * trigger_flag1 + 2 * trigger_flag2 + 3 * trigger_flag3 + 4 * trigger_flag4 + 5 * trigger_flag5 + 6 * trigger_flag6 + 7 * trigger_flag7 + 8 * trigger_flag8 + 9 * trigger_flag9 + 10 * trigger_flag10 + 11 * trigger_flag11 + 12 * trigger_flag12 + 13 * trigger_flag13 + 14 * trigger_flag14 + 15 * trigger_flag15
+    card_b = 0 * tf0 + 1 * tf1 + 2 * tf2 + 3 * tf3 + 4 * tf4 + 5 * tf5 + 6 * tf6 + 7 * tf7 + 8 * tf8 + 9 * tf9 + 10 * tf10 + 11 * tf11 + 12 * tf12 + 13 * tf13 + 14 * tf14 + 15 * tf15 + 16 * tf16 + 17 * tf17 + 18 * tf18 + 19 * tf19 + 20 * tf20 + 21 * tf21 + 22 * tf22 + 23 * tf23 + 24 * tf24 + 25 * tf25 + 26 * tf26 + 27 * tf27 + 28 * tf28 + 29 * tf29 + 30 * tf30 + 31 * tf31 + 32 * tf32 + 33 * tf33 + 34 * tf34 + 35 * tf35
 %end
 
-%define card_selected = (sync >= FLIP_CARD_A) * (mouse_down) * (trigger_flag0 + trigger_flag1 + trigger_flag2 + trigger_flag3 + trigger_flag4 + trigger_flag5 + trigger_flag6 + trigger_flag7 + trigger_flag8 + trigger_flag9 + trigger_flag10 +  trigger_flag11 + trigger_flag12 + trigger_flag13 + trigger_flag14 + trigger_flag15)
+%define card_selected = (sync >= FLIP_CARD_A) * (mouse_down) * (tf0 + tf1 + tf2 + tf3 + tf4 + tf5 + tf6 + tf7 + tf8 + tf9 + tf10 +  tf11 + tf12 + tf13 + tf14 + tf15 + tf16 + tf17 + tf18 + tf19 + tf20 + tf21 + tf22 + tf23 + tf24 + tf25 + tf26 + tf27 + tf28 + tf29 + tf30 + tf31 + tf32 + tf33 + tf34 + tf35)
 
 
-target target0 (x_position = card_x_pos_f (0); y_position = card_y_pos_f (0); trigger_flag = trigger_flag0; index = 0)
-target target1 (x_position = card_x_pos_f (1); y_position = card_y_pos_f (1); trigger_flag = trigger_flag1; index = 1)
-target target2 (x_position = card_x_pos_f (2); y_position = card_y_pos_f (2); trigger_flag = trigger_flag2; index = 2)
-target target3 (x_position = card_x_pos_f (3); y_position = card_y_pos_f (3); trigger_flag = trigger_flag3; index = 3)
-target target4 (x_position = card_x_pos_f (4); y_position = card_y_pos_f (4); trigger_flag = trigger_flag4; index = 4)
-target target5 (x_position = card_x_pos_f (5); y_position = card_y_pos_f (5); trigger_flag = trigger_flag5; index = 5)
-target target6 (x_position = card_x_pos_f (6); y_position = card_y_pos_f (6); trigger_flag = trigger_flag6; index = 6)
-target target7 (x_position = card_x_pos_f (7); y_position = card_y_pos_f (7); trigger_flag = trigger_flag7; index = 7)
-target target8 (x_position = card_x_pos_f (8); y_position = card_y_pos_f (8); trigger_flag = trigger_flag8; index = 8)
-target target9 (x_position = card_x_pos_f (9); y_position = card_y_pos_f (9); trigger_flag = trigger_flag9; index = 9)
-target target10 (x_position = card_x_pos_f (10); y_position = card_y_pos_f (10); trigger_flag = trigger_flag10; index = 10)
-target target11 (x_position = card_x_pos_f (11); y_position = card_y_pos_f (11); trigger_flag = trigger_flag11; index = 11)
-target target12 (x_position = card_x_pos_f (12); y_position = card_y_pos_f (12); trigger_flag = trigger_flag12; index = 12)
-target target13 (x_position = card_x_pos_f (13); y_position = card_y_pos_f (13); trigger_flag = trigger_flag13; index = 13)
-target target14 (x_position = card_x_pos_f (14); y_position = card_y_pos_f (14); trigger_flag = trigger_flag14; index = 14)
-target target15 (x_position = card_x_pos_f (15); y_position = card_y_pos_f (15); trigger_flag = trigger_flag15; index = 15)
+target target0 (x_position = card_x_pos_f (0); y_position = card_y_pos_f (0); trigger_flag = tf0; index = 0)
+target target1 (x_position = card_x_pos_f (1); y_position = card_y_pos_f (1); trigger_flag = tf1; index = 1)
+target target2 (x_position = card_x_pos_f (2); y_position = card_y_pos_f (2); trigger_flag = tf2; index = 2)
+target target3 (x_position = card_x_pos_f (3); y_position = card_y_pos_f (3); trigger_flag = tf3; index = 3)
+target target4 (x_position = card_x_pos_f (4); y_position = card_y_pos_f (4); trigger_flag = tf4; index = 4)
+target target5 (x_position = card_x_pos_f (5); y_position = card_y_pos_f (5); trigger_flag = tf5; index = 5)
+target target6 (x_position = card_x_pos_f (6); y_position = card_y_pos_f (6); trigger_flag = tf6; index = 6)
+target target7 (x_position = card_x_pos_f (7); y_position = card_y_pos_f (7); trigger_flag = tf7; index = 7)
+target target8 (x_position = card_x_pos_f (8); y_position = card_y_pos_f (8); trigger_flag = tf8; index = 8)
+target target9 (x_position = card_x_pos_f (9); y_position = card_y_pos_f (9); trigger_flag = tf9; index = 9)
+target target10 (x_position = card_x_pos_f (10); y_position = card_y_pos_f (10); trigger_flag = tf10; index = 10)
+target target11 (x_position = card_x_pos_f (11); y_position = card_y_pos_f (11); trigger_flag = tf11; index = 11)
+target target12 (x_position = card_x_pos_f (12); y_position = card_y_pos_f (12); trigger_flag = tf12; index = 12)
+target target13 (x_position = card_x_pos_f (13); y_position = card_y_pos_f (13); trigger_flag = tf13; index = 13)
+target target14 (x_position = card_x_pos_f (14); y_position = card_y_pos_f (14); trigger_flag = tf14; index = 14)
+target target15 (x_position = card_x_pos_f (15); y_position = card_y_pos_f (15); trigger_flag = tf15; index = 15)
+target target16 (x_position = card_x_pos_f (16); y_position = card_y_pos_f (16); trigger_flag = tf16; index = 16)
+target target17 (x_position = card_x_pos_f (17); y_position = card_y_pos_f (17); trigger_flag = tf17; index = 17)
+target target18 (x_position = card_x_pos_f (18); y_position = card_y_pos_f (18); trigger_flag = tf18; index = 18)
+target target19 (x_position = card_x_pos_f (19); y_position = card_y_pos_f (19); trigger_flag = tf19; index = 19)
+target target20 (x_position = card_x_pos_f (20); y_position = card_y_pos_f (20); trigger_flag = tf20; index = 20)
+target target21 (x_position = card_x_pos_f (21); y_position = card_y_pos_f (21); trigger_flag = tf21; index = 21)
+target target22 (x_position = card_x_pos_f (22); y_position = card_y_pos_f (22); trigger_flag = tf22; index = 22)
+target target23 (x_position = card_x_pos_f (23); y_position = card_y_pos_f (23); trigger_flag = tf23; index = 23)
+target target24 (x_position = card_x_pos_f (24); y_position = card_y_pos_f (24); trigger_flag = tf24; index = 24)
+target target25 (x_position = card_x_pos_f (25); y_position = card_y_pos_f (25); trigger_flag = tf25; index = 25)
+target target26 (x_position = card_x_pos_f (26); y_position = card_y_pos_f (26); trigger_flag = tf26; index = 26)
+target target27 (x_position = card_x_pos_f (27); y_position = card_y_pos_f (27); trigger_flag = tf27; index = 27)
+target target28 (x_position = card_x_pos_f (28); y_position = card_y_pos_f (28); trigger_flag = tf28; index = 28)
+target target29 (x_position = card_x_pos_f (29); y_position = card_y_pos_f (29); trigger_flag = tf29; index = 29)
+target target30 (x_position = card_x_pos_f (30); y_position = card_y_pos_f (30); trigger_flag = tf30; index = 30)
+target target31 (x_position = card_x_pos_f (31); y_position = card_y_pos_f (31); trigger_flag = tf31; index = 31)
+target target32 (x_position = card_x_pos_f (32); y_position = card_y_pos_f (32); trigger_flag = tf32; index = 32)
+target target33 (x_position = card_x_pos_f (33); y_position = card_y_pos_f (33); trigger_flag = tf33; index = 33)
+target target34 (x_position = card_x_pos_f (34); y_position = card_y_pos_f (34); trigger_flag = tf34; index = 34)
+target target35 (x_position = card_x_pos_f (35); y_position = card_y_pos_f (35); trigger_flag = tf35; index = 35)
 
 %define display_targets ()
     live_queue_stimulus (target0)
@@ -162,4 +215,63 @@ target target15 (x_position = card_x_pos_f (15); y_position = card_y_pos_f (15);
     live_queue_stimulus (target13)
     live_queue_stimulus (target14)
     live_queue_stimulus (target15)
+    live_queue_stimulus (target16)
+    live_queue_stimulus (target17)
+    live_queue_stimulus (target18)
+    live_queue_stimulus (target19)
+    live_queue_stimulus (target20)
+    live_queue_stimulus (target21)
+    live_queue_stimulus (target22)
+    live_queue_stimulus (target23)
+    live_queue_stimulus (target24)
+    live_queue_stimulus (target25)
+    live_queue_stimulus (target26)
+    live_queue_stimulus (target27)
+    live_queue_stimulus (target28)
+    live_queue_stimulus (target29)
+    live_queue_stimulus (target30)
+    live_queue_stimulus (target31)
+    live_queue_stimulus (target32)
+    live_queue_stimulus (target33)
+    live_queue_stimulus (target34)
+    live_queue_stimulus (target35)
+%end
+
+%define dequeue_targets ()
+    dequeue_stimulus (target0)
+    dequeue_stimulus (target1)
+    dequeue_stimulus (target2)
+    dequeue_stimulus (target3)
+    dequeue_stimulus (target4)
+    dequeue_stimulus (target5)
+    dequeue_stimulus (target6)
+    dequeue_stimulus (target7)
+    dequeue_stimulus (target8)
+    dequeue_stimulus (target9)
+    dequeue_stimulus (target10)
+    dequeue_stimulus (target11)
+    dequeue_stimulus (target12)
+    dequeue_stimulus (target13)
+    dequeue_stimulus (target14)
+    dequeue_stimulus (target15)
+    dequeue_stimulus (target16)
+    dequeue_stimulus (target17)
+    dequeue_stimulus (target18)
+    dequeue_stimulus (target19)
+    dequeue_stimulus (target20)
+    dequeue_stimulus (target21)
+    dequeue_stimulus (target22)
+    dequeue_stimulus (target23)
+    dequeue_stimulus (target24)
+    dequeue_stimulus (target25)
+    dequeue_stimulus (target26)
+    dequeue_stimulus (target27)
+    dequeue_stimulus (target28)
+    dequeue_stimulus (target29)
+    dequeue_stimulus (target30)
+    dequeue_stimulus (target31)
+    dequeue_stimulus (target32)
+    dequeue_stimulus (target33)
+    dequeue_stimulus (target34)
+    dequeue_stimulus (target35)
 %end
