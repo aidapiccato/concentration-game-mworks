@@ -12,8 +12,9 @@ CONFIGS = { # mapping number of pairs to possible configurations
 ALL_N_PAIRS = [2, 8, 18] # possible number of pairs in a configuration
 N_CONFIG_REPEATS = 4 # number of times each configuration is repeated (each time with unique image layout)
 N_CYCLES = 3
-username = 'aidapiccato'
-# username = 'apiccato'
+
+# username = 'aidapiccato'
+username = 'apiccato'
 
 dir_path = '/Users/%s/PyCharmProjects/concentration/concentration-game-mworks' % username
 

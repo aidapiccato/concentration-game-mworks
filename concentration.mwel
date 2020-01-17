@@ -1,3 +1,6 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// variable groups
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 group 'Configuration variables' {
     var n_pairs = 8
     var grid_dims = [2, 2]
@@ -14,11 +17,12 @@ group 'Configuration variables' {
 var sync = 0
 
 group 'Sync variables' {
-    var TRIAL_INIT = 1
-    var FLIP_CARD_A = 2
-    var FLIP_CARD_B = 3
-    var FEEDBACK = 4
-    var TRIAL_END = 5
+    var ITI = 1
+    var TRIAL_INIT = 2
+    var FLIP_CARD_A = 3
+    var FLIP_CARD_B = 4
+    var FEEDBACK = 5
+    var TRIAL_END = 6
 }
 
 group 'Trial variables' {
@@ -28,21 +32,10 @@ group 'Trial variables' {
     var failure = 0
     var ignore = 0
 }
-
-%include 'concentration-io'
-%include 'concentration-stim'
-
-stimulus_display (
-    background_color = br, bg, bb
-    redraw_on_every_refresh = true
-    announce_stimuli_on_implicit_updates = false
-)
-
-
 group 'Timer duration variables' {
     var choice_dur = 5s
     var feedback_dur = 0.5s
-    var iti_dur = 1s
+    var iti_dur = 0.5s
 }
 
 group 'Python variables' {
@@ -53,11 +46,18 @@ group 'Python variables' {
     var py_inv_grid = [0, 0, 0, 0]
     var py_card_a = 0
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// includes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%include 'concentration-io'
+%include 'concentration-stim'
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// update macros
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 %define update_block_meta ()
-
    block_index = block_index + 1
    run_python_string(get_block_metaparameters())
    n_pairs = py_n_pairs
@@ -85,7 +85,13 @@ group 'Python variables' {
 %define update_trial_meta ()
     run_python_string(get_trial_metaparameters())
     card_a = py_card_a
+    trial_index = trial_index + 1
 %end
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// evaluation macros
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 %define mark_as_flipped ()
     flipped[card_a] = 1
@@ -103,6 +109,10 @@ group 'Python variables' {
     }
 %end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// experiment level macros
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 %define n_cycles = 3 // number of times all cards in each config are cycled through
 %define n_configs = 3 // number of different configuration sizes
 %define n_config_repeats = 4 // number of times a configuration size is repeated
@@ -114,15 +124,18 @@ group 'Python variables' {
 %define n_trials_total = n_cycles * n_images  // number of trials for current block
 
 var block_index = -1
-
-selection trial_index (
+var trial_index = -1 // session_level trial_index
+selection selection_trial_index (
     values = 0:n_trials_max
     selection = sequential_ascending
     advance_on_accept = NO
     autoreset = YES
 )
 
-var subject_id = 1
+var subject_id = 0
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////// protocols
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 protocol 'Concentration - No feedback, subject_id' {
     start_io_device (pointer)
@@ -148,18 +161,23 @@ protocol 'Concentration - No feedback, subject_id' {
                     sync = 0
                     goto (
                         target = 'Yield'
-                        when = trial_index >= n_trials_total
+                        when = selection_trial_index >= n_trials_total
                     )
-                    goto ( 'Trial init' )
+                    goto ( 'Intertrial interval' )
                 }
                 state 'Yield' {
-                    accept_selections (trial_index)
-                    next_selection (trial_index)
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
                     yield ()
                 }
-                state 'Trial init' {
+                state 'Intertrial interval' {
+                    sync = ITI
                     reset_trial_vars ()
                     wait (iti_dur)
+                    goto ('Trial init')
+                }
+                state 'Trial init' {
+
                     report ('TRIAL INIT $trial_index')
                     sync = TRIAL_INIT
                     update_trial_meta ()
@@ -208,8 +226,8 @@ protocol 'Concentration - No feedback, subject_id' {
                     n_failure = n_failure + failure
                     n_ignore = n_ignore + ignore
 
-                    accept_selections (trial_index)
-                    next_selection (trial_index)
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
                     yield ()
                 }
             }
