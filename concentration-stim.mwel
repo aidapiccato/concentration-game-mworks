@@ -14,16 +14,16 @@ group 'Stimulus variables' {
     var stim_dist = 2
 }
 
-%define for_each_card ()
-    range_replicator (
-        variable = card_index
-        from = 0
-        to = n_cards_max - 1
-        step = 1
-    )
-%end
+stimulus_display (
+    background_color = br, bg, bb
+    redraw_on_every_refresh = true
+    announce_stimuli_on_implicit_updates = false
+)
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////// card positions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 %define card_x_index_f (index) index % grid_dims[1]
@@ -44,6 +44,14 @@ group 'Stimulus variables' {
 %define image_x_pos = card_x_pos_f (inv_grid[${image_index}])
 %define image_y_pos = card_y_pos_f (inv_grid[${image_index}])
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////// images
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+%define is_card_b_and_vis (index)  (card_b == index and sync >= FLIP_CARD_B)
+%define is_card_a_and_vis (index)  (card_a == index and sync >= FLIP_CARD_A)
+
 %define image_visible = inv_grid[${image_index}] != -1
 
 %define for_each_image ()
@@ -58,7 +66,7 @@ group 'Stimulus variables' {
 stimulus_group card_image_stims {
     for_each_image {
          image_file 'img_stim_${image_index}' (
-                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
+                path = "/Users/apiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
                 x_size = stim_size
                 x_position = image_x_pos
                 y_position = image_y_pos
@@ -75,23 +83,24 @@ stimulus_group card_image_stims {
     }
 %end
 
-%define dequeue_images ()
-    for_each_image {
-        list {
-            dequeue_stimulus (card_image_stims[image_index])
-        }
-    }
-%end
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////// Target declarations
+///////////// card selection
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+%define read_card_selection ()
+    card_b = 0 * tf0 + 1 * tf1 + 2 * tf2 + 3 * tf3 + 4 * tf4 + 5 * tf5 + 6 * tf6 + 7 * tf7 + 8 * tf8 + 9 * tf9 + 10 * tf10 + 11 * tf11 + 12 * tf12 + 13 * tf13 + 14 * tf14 + 15 * tf15 + 16 * tf16 + 17 * tf17 + 18 * tf18 + 19 * tf19 + 20 * tf20 + 21 * tf21 + 22 * tf22 + 23 * tf23 + 24 * tf24 + 25 * tf25 + 26 * tf26 + 27 * tf27 + 28 * tf28 + 29 * tf29 + 30 * tf30 + 31 * tf31 + 32 * tf32 + 33 * tf33 + 34 * tf34 + 35 * tf35
+%end
+
+%define card_selected = (sync >= FLIP_CARD_A) * (mouse_down) * (tf0 + tf1 + tf2 + tf3 + tf4 + tf5 + tf6 + tf7 + tf8 + tf9 + tf10 +  tf11 + tf12 + tf13 + tf14 + tf15 + tf16 + tf17 + tf18 + tf19 + tf20 + tf21 + tf22 + tf23 + tf24 + tf25 + tf26 + tf27 + tf28 + tf29 + tf30 + tf31 + tf32 + tf33 + tf34 + tf35)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////// target declarations
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 %define target_color = 0.25
 
-%define is_card_b_and_vis (index)  (card_b == index and sync >= FLIP_CARD_B)
-%define is_card_a_and_vis (index)  (card_a == index and sync >= FLIP_CARD_A)
-%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index)) // and sync < BLOCK_END
+%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index))
 
 %define target (x_position, y_position, trigger_flag, index)
     fixation_point (
@@ -154,11 +163,6 @@ var tfs = [tf0, tf1, tf2, tf3, tf4, tf5,
     tf24, tf25, tf26, tf27, tf28, tf29, tf30, tf31,
     tf32, tf33, tf34, tf35 ]
 
-%define read_card_selection ()
-    card_b = 0 * tf0 + 1 * tf1 + 2 * tf2 + 3 * tf3 + 4 * tf4 + 5 * tf5 + 6 * tf6 + 7 * tf7 + 8 * tf8 + 9 * tf9 + 10 * tf10 + 11 * tf11 + 12 * tf12 + 13 * tf13 + 14 * tf14 + 15 * tf15 + 16 * tf16 + 17 * tf17 + 18 * tf18 + 19 * tf19 + 20 * tf20 + 21 * tf21 + 22 * tf22 + 23 * tf23 + 24 * tf24 + 25 * tf25 + 26 * tf26 + 27 * tf27 + 28 * tf28 + 29 * tf29 + 30 * tf30 + 31 * tf31 + 32 * tf32 + 33 * tf33 + 34 * tf34 + 35 * tf35
-%end
-
-%define card_selected = (sync >= FLIP_CARD_A) * (mouse_down) * (tf0 + tf1 + tf2 + tf3 + tf4 + tf5 + tf6 + tf7 + tf8 + tf9 + tf10 +  tf11 + tf12 + tf13 + tf14 + tf15 + tf16 + tf17 + tf18 + tf19 + tf20 + tf21 + tf22 + tf23 + tf24 + tf25 + tf26 + tf27 + tf28 + tf29 + tf30 + tf31 + tf32 + tf33 + tf34 + tf35)
 
 
 target target0 (x_position = card_x_pos_f (0); y_position = card_y_pos_f (0); trigger_flag = tf0; index = 0)
@@ -235,43 +239,4 @@ target target35 (x_position = card_x_pos_f (35); y_position = card_y_pos_f (35);
     live_queue_stimulus (target33)
     live_queue_stimulus (target34)
     live_queue_stimulus (target35)
-%end
-
-%define dequeue_targets ()
-    dequeue_stimulus (target0)
-    dequeue_stimulus (target1)
-    dequeue_stimulus (target2)
-    dequeue_stimulus (target3)
-    dequeue_stimulus (target4)
-    dequeue_stimulus (target5)
-    dequeue_stimulus (target6)
-    dequeue_stimulus (target7)
-    dequeue_stimulus (target8)
-    dequeue_stimulus (target9)
-    dequeue_stimulus (target10)
-    dequeue_stimulus (target11)
-    dequeue_stimulus (target12)
-    dequeue_stimulus (target13)
-    dequeue_stimulus (target14)
-    dequeue_stimulus (target15)
-    dequeue_stimulus (target16)
-    dequeue_stimulus (target17)
-    dequeue_stimulus (target18)
-    dequeue_stimulus (target19)
-    dequeue_stimulus (target20)
-    dequeue_stimulus (target21)
-    dequeue_stimulus (target22)
-    dequeue_stimulus (target23)
-    dequeue_stimulus (target24)
-    dequeue_stimulus (target25)
-    dequeue_stimulus (target26)
-    dequeue_stimulus (target27)
-    dequeue_stimulus (target28)
-    dequeue_stimulus (target29)
-    dequeue_stimulus (target30)
-    dequeue_stimulus (target31)
-    dequeue_stimulus (target32)
-    dequeue_stimulus (target33)
-    dequeue_stimulus (target34)
-    dequeue_stimulus (target35)
 %end
