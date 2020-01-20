@@ -23,6 +23,7 @@ group 'Sync variables' {
     var FLIP_CARD_B = 4
     var FEEDBACK = 5
     var TRIAL_END = 6
+    var BLOCK_BREAK = 7
 }
 
 group 'Trial variables' {
@@ -36,6 +37,7 @@ group 'Timer duration variables' {
     var choice_dur = 5s
     var feedback_dur = 0.5s
     var iti_dur = 0.5s
+    var block_dur = 30s
 }
 
 group 'Python variables' {
@@ -72,6 +74,8 @@ group 'Python variables' {
     n_success = 0
     n_failure = 0
     n_ignore = 0
+    trial_index = -1
+    reset_selection (selection_trial_index)
 %end
 
 %define reset_trial_vars ()
@@ -83,10 +87,12 @@ group 'Python variables' {
 %end
 
 %define update_trial_meta ()
+    trial_index = selection_trial_index
     run_python_string(get_trial_metaparameters())
     card_a = py_card_a
-    trial_index = trial_index + 1
+
 %end
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,11 +131,12 @@ group 'Python variables' {
 
 var block_index = -1
 var trial_index = -1 // session_level trial_index
+
 selection selection_trial_index (
     values = 0:n_trials_max
     selection = sequential_ascending
     advance_on_accept = NO
-    autoreset = YES
+    autoreset = NO
 )
 
 var subject_id = 0
@@ -147,6 +154,7 @@ protocol 'Concentration - No feedback, subject_id' {
         report ('***NEW BLOCK $block_index***')
 
         update_display ()
+
         reset_block_vars ()
 
         display_images ()
@@ -158,12 +166,26 @@ protocol 'Concentration - No feedback, subject_id' {
         trial (nsamples = n_trials_max; sampling_method = samples) {
             task {
                 state 'Transition' {
+                    report ('Selection trial index: $selection_trial_index, trial_index: $trial_index')
                     sync = 0
                     goto (
+                        target = 'Block break'
+                        when = selection_trial_index == n_trials_total
+                    )
+                    goto (
                         target = 'Yield'
-                        when = selection_trial_index >= n_trials_total
+                        when = selection_trial_index > n_trials_total
                     )
                     goto ( 'Intertrial interval' )
+                }
+                state 'Block break' {
+                    report('BLOCK BREAK')
+                    sync = BLOCK_BREAK
+                    display_message ()
+                    wait (block_dur)
+                    hide_message ()
+                    sync = 0
+                    goto ('Yield')
                 }
                 state 'Yield' {
                     accept_selections (selection_trial_index)
@@ -177,7 +199,6 @@ protocol 'Concentration - No feedback, subject_id' {
                     goto ('Trial init')
                 }
                 state 'Trial init' {
-
                     report ('TRIAL INIT $trial_index')
                     sync = TRIAL_INIT
                     update_trial_meta ()
@@ -226,8 +247,8 @@ protocol 'Concentration - No feedback, subject_id' {
                     n_failure = n_failure + failure
                     n_ignore = n_ignore + ignore
 
-                    accept_selections (trial_index)
-                    next_selection (trial_index)
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
                     sync = TRIAL_END
                     yield ()
                 }

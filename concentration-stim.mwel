@@ -20,6 +20,27 @@ stimulus_display (
     announce_stimuli_on_implicit_updates = false
 )
 
+var break_start_time = 0
+
+text break_prompt (
+    text = 'You can now take a short break, after which you will move on to a new grid. The task will resume in ' + (string)(30 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
+    font_name = 'Helvetica Neue'
+    font_size = 30
+    x_size = 30.0
+    y_size = 10.0
+)
+
+%define display_message ()
+    break_start_time = next_frame_time ()
+    update_display ()
+    live_queue_stimulus (break_prompt)
+    update_display ()
+%end
+
+%define hide_message()
+    dequeue_stimulus( break_prompt )
+    update_display()
+%end
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////// card positions
@@ -52,7 +73,7 @@ stimulus_display (
 %define is_card_b_and_vis (index)  (card_b == index and sync >= FLIP_CARD_B)
 %define is_card_a_and_vis (index)  (card_a == index and sync >= FLIP_CARD_A)
 
-%define image_visible = inv_grid[${image_index}] != -1
+%define image_visible = inv_grid[${image_index}] != -1 and sync != BLOCK_BREAK
 
 %define for_each_image ()
     range_replicator (
@@ -66,7 +87,7 @@ stimulus_display (
 stimulus_group card_image_stims {
     for_each_image {
          image_file 'img_stim_${image_index}' (
-                path = "/Users/apiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
+                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
                 x_size = stim_size
                 x_position = image_x_pos
                 y_position = image_y_pos
@@ -100,7 +121,7 @@ stimulus_group card_image_stims {
 
 %define target_color = 0.25
 
-%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index))
+%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index)) and sync != BLOCK_BREAK
 
 %define target (x_position, y_position, trigger_flag, index)
     fixation_point (
