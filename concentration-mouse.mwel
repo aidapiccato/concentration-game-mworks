@@ -1,0 +1,124 @@
+
+%include 'concentration-mouse-io'
+
+%define effector_x = pointer_x
+%define effector_y = pointer_y
+%define effector_down = mouse_down
+
+%include 'concentration-shared'
+
+protocol 'Concentration - Mouse' {
+    start_io_device (pointer)
+    mouse = 1
+    touch = 0
+    run_python_file ('utils.py')
+    feedback = 0
+    block (nsamples = n_blocks * n_trials_max ; sampling_method = samples; selection = sequential_ascending) {
+        update_block_meta ()
+
+        report ('***NEW BLOCK $block_index***')
+
+        update_display ()
+
+        reset_block_vars ()
+
+        display_images ()
+
+        display_targets ()
+
+        update_display ()
+
+        trial (nsamples = n_trials_max; sampling_method = samples) {
+            task {
+                state 'Transition' {
+                    report ('Selection trial index: $selection_trial_index, trial_index: $trial_index')
+                    sync = 0
+                    goto (
+                        target = 'Block break'
+                        when = selection_trial_index == n_trials_total and (block_index + 1) % 2 == 0
+                    )
+                    goto (
+                        target = 'Yield'
+                        when = selection_trial_index >= n_trials_total
+                    )
+                    goto ( 'Intertrial interval' )
+                }
+                state 'Block break' {
+                    report('BLOCK BREAK')
+                    sync = BLOCK_BREAK
+                    display_message ()
+                    wait (block_dur)
+                    hide_message ()
+                    sync = 0
+                    goto ('Yield')
+                }
+                state 'Yield' {
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
+                    yield ()
+                }
+                state 'Intertrial interval' {
+                    sync = ITI
+                    reset_trial_vars ()
+                    wait (iti_dur)
+                    goto ('Trial init')
+                }
+                state 'Trial init' {
+                    report ('TRIAL INIT $trial_index')
+                    sync = TRIAL_INIT
+                    update_trial_meta ()
+                    goto ( 'Flip first card' )
+                }
+                state 'Flip first card' {
+                    report ('FLIP FIRST CARD $card_a')
+                    sync = FLIP_CARD_A
+                    start_timer (
+                        timer = choice_timer
+                        duration = choice_dur
+                    )
+                    goto (
+                        target = 'Flip second card'
+                        when = card_selected
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (choice_timer)
+                    )
+                }
+                state 'Flip second card' {
+                    report ('FLIP SECOND CARD')
+                    sync = FLIP_CARD_B
+                    ignore = 0
+                    read_card_selection ()
+                    evaluate ()
+                    goto ( 'Feedback' )
+                }
+                state 'Feedback' {
+                    sync = FEEDBACK
+                    feedback_dur = disc_rand(1, 2) * 500ms
+                    start_timer (
+                        timer = feedback_timer
+                        duration = feedback_dur
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (feedback_timer)
+                    )
+                }
+                state 'Trial end' {
+                    report ('TRIAL END')
+
+
+                    n_success = n_success + success
+                    n_failure = n_failure + failure
+                    n_ignore = n_ignore + ignore
+
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
+                    sync = TRIAL_END
+                    yield ()
+                }
+            }
+        }
+    }
+}

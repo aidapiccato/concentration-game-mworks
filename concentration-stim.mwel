@@ -1,6 +1,4 @@
-%include 'concentration-io'
 
-%define n_cards_max = 36
 
 group 'Stimulus variables' {
     var card_index (scope = local; default_value = 0)
@@ -121,7 +119,7 @@ stimulus_group card_image_stims {
 
 %define target_color = 0.25
 
-%define target_visible (index) index < (n_pairs * 2) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index)) and sync != BLOCK_BREAK
+%define target_visible (index) index < (n_images) and !(feedback * flipped[index]) and !(is_card_a_and_vis (index) or is_card_b_and_vis (index)) and sync != BLOCK_BREAK
 
 %define target (x_position, y_position, trigger_flag, index)
     fixation_point (
@@ -130,8 +128,8 @@ stimulus_group card_image_stims {
         x_position = x_position
         y_position = y_position
         trigger_width = stim_size
-        trigger_watch_x = pointer_x
-        trigger_watch_y = pointer_y
+        trigger_watch_x = effector_x
+        trigger_watch_y = effector_y
         trigger_flag = trigger_flag
         alpha_multiplier = target_visible (index)
     )
