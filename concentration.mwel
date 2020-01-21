@@ -34,8 +34,8 @@ group 'Trial variables' {
     var ignore = 0
 }
 group 'Timer duration variables' {
-    var choice_dur = 5s
-    var feedback_dur = 0.5s
+    var choice_dur = 2s
+    var feedback_dur = 500ms
     var iti_dur = 0.5s
     var block_dur = 30s
 }
@@ -106,6 +106,10 @@ group 'Python variables' {
 
 %define evaluate ()
     ignore = ignore or card_a == card_b
+    success = grid[card_b] == grid[card_a] * !ignore
+    failure = !success * !ignore
+    ignore = ignore
+    /*
     if (! ignore) {
         success = grid[card_b] == grid[card_a]
         failure = !success
@@ -113,6 +117,7 @@ group 'Python variables' {
     if (feedback and success) {
         mark_as_flipped ()
     }
+    */
 %end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,11 +175,11 @@ protocol 'Concentration - No feedback, subject_id' {
                     sync = 0
                     goto (
                         target = 'Block break'
-                        when = selection_trial_index == n_trials_total
+                        when = selection_trial_index == n_trials_total and (block_index + 1) % 2 == 0
                     )
                     goto (
                         target = 'Yield'
-                        when = selection_trial_index > n_trials_total
+                        when = selection_trial_index >= n_trials_total
                     )
                     goto ( 'Intertrial interval' )
                 }

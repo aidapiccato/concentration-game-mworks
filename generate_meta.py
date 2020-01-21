@@ -1,5 +1,5 @@
 import pickle as pk
-from utils import *
+from utils import MAX_N_PAIRS, MAX_N_IMAGES, N_CONFIG_REPEATS, ALL_N_PAIRS, N_CYCLES, CONFIGS, dir_path
 import numpy as np
 
 def generate_subject_meta(subject_id):
