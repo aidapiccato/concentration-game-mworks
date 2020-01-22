@@ -6,21 +6,44 @@
 
 %include 'concentration-shared'
 
+%define update_trial_meta ()
+    card_a = trials[selection_trial_index]
+%end
+
+%define update_block_meta ()
+   block_index = block_index + 1
+   run_python_string(get_block_metaparameters_ios())
+   n_pairs = py_n_pairs
+   grid = py_grid
+   inv_grid = py_inv_grid
+   grid_dims = py_grid_dims
+   trials = py_trials
+%end
+
+%define refresh_vars_for_sync ()
+    block_index = block_index
+    n_pairs = n_pairs
+    grid = grid
+    grid_dims = grid_dims
+    inv_grid = inv_grid
+    trials = trials
+    card_a = card_a
+    card_b = card_b
+    sucess = sucess
+    ignore = ignore
+    failure = failure
+%end
+
 protocol 'Concentration - iOS' {
     touch = 1
     mouse = 0
-    run_python_file ('utils.py')
+    run_python_file ('utils_ios.py')
     feedback = 0
-
-    block (nsamples = n_blocks * n_trials_max ; sampling_method = samples; selection = sequential_ascending) {
+    block (nsamples = n_blocks * n_trials_max; sampling_method = samples; selection = sequential_ascending) {
 
         update_block_meta ()
 
         report ('***NEW BLOCK $block_index***')
-
-
-        /*
-        update_display ()
 
         reset_block_vars ()
 
@@ -30,12 +53,10 @@ protocol 'Concentration - iOS' {
 
         update_display ()
 
-
-
         trial (nsamples = n_trials_max; sampling_method = samples) {
             task {
                 state 'Transition' {
-                    report ('Selection trial index: $selection_trial_index, trial_index: $trial_index')
+                    report ('Selection trial index: $selection_trial_index')
                     sync = 0
                     goto (
                         target = 'Block break'
@@ -68,7 +89,7 @@ protocol 'Concentration - iOS' {
                     goto ('Trial init')
                 }
                 state 'Trial init' {
-                    report ('TRIAL INIT $trial_index')
+                    report ('TRIAL INIT $selection_trial_index')
                     sync = TRIAL_INIT
                     update_trial_meta ()
                     goto ( 'Flip first card' )
@@ -117,12 +138,15 @@ protocol 'Concentration - iOS' {
                     n_failure = n_failure + failure
                     n_ignore = n_ignore + ignore
 
+                    refresh_vars_for_sync ()
+
                     accept_selections (selection_trial_index)
                     next_selection (selection_trial_index)
+
                     sync = TRIAL_END
                     yield ()
                 }
             }
-        }*/
+        }
     }
 }

@@ -23,9 +23,9 @@ def generate_subject_meta(subject_id):
                       + np.tile([0, 1], n_pairs)  # randomly choose n_pair images
 
             if np.isin(n_pairs, [4, 12]):
-                oddball = np.random.choice(np.setdiff1d(np.arange(MAX_N_PAIRS), img_ixs)) # randomly choose an image
-                img_ixs = np.append(img_ixs, oddball)                                     # that is not already a pair
-            inv_grid = np.zeros(MAX_N_IMAGES) - 1                                         # to be oddball
+                oddball = np.random.choice(np.setdiff1d(np.arange(MAX_N_PAIRS), img_ixs))  # randomly choose an image
+                img_ixs = np.append(img_ixs, oddball)  # that is not already a pair
+            inv_grid = np.zeros(MAX_N_IMAGES) - 1  # to be oddball
             inv_grid[img_ixs] = np.argsort(grid)
             inv_grid = np.asarray(inv_grid, dtype=int)
 
