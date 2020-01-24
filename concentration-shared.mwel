@@ -20,6 +20,7 @@ group 'Configuration variables' {
 
 var sync = 0
 
+
 group 'Sync variables' {
     var ITI = 1
     var TRIAL_INIT = 2
@@ -58,10 +59,10 @@ group 'Python variables' {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 %define n_cycles = 3 // number of times all cards in each config are cycled through
-%define n_configs = 3 // number of different configuration sizes
+%define n_configs = 4 // number of different configuration sizes
 %define n_config_repeats = 4 // number of times a configuration size is repeated
 %define n_blocks = n_config_repeats * n_configs
-%define n_cards_max = 36
+%define n_cards_max = 25
 
 %define n_images = grid_dims[0] * grid_dims[1]
 %define n_images_pairs = n_images - (n_images % 2)
@@ -69,7 +70,7 @@ group 'Python variables' {
 %define n_trials_total = n_cycles * n_images_pairs  // number of trials for current block
 
 var block_index = -1
-var trial_index = -1 // session_level trial_index
+var trial_index = -1
 
 selection selection_trial_index (
     values = 0:n_trials_max
@@ -104,7 +105,6 @@ var subject_id = 0
     n_success = 0
     n_failure = 0
     n_ignore = 0
-    trial_index = -1
     reset_selection (selection_trial_index)
 %end
 
@@ -143,11 +143,5 @@ var subject_id = 0
     success = grid[card_b] == grid[card_a] * !ignore
     failure = !success * !ignore
     ignore = ignore
-    /*
-    if (! ignore) {
-        success = grid[card_b] == grid[card_a]
-        failure = !success
-    }
-    */
 %end
 

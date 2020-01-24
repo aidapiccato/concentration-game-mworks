@@ -85,7 +85,7 @@ text break_prompt (
 stimulus_group card_image_stims {
     for_each_image {
          image_file 'img_stim_${image_index}' (
-                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
+                path = "/Users/apiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
                 x_size = stim_size
                 x_position = image_x_pos
                 y_position = image_y_pos

@@ -6,9 +6,14 @@
 
 %include 'concentration-shared'
 
+subject_id = 1
+
 %define update_trial_meta ()
     card_a = trials[selection_trial_index]
+    trial_index = trial_index + 1
 %end
+
+
 
 %define update_block_meta ()
    block_index = block_index + 1
@@ -29,9 +34,10 @@
     trials = trials
     card_a = card_a
     card_b = card_b
-    sucess = sucess
+    success = success
     ignore = ignore
     failure = failure
+    trial_index = trial_index
 %end
 
 protocol 'Concentration - iOS' {
