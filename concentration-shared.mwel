@@ -71,7 +71,7 @@ group 'Python variables' {
 
 var block_index = -1
 var trial_index = -1
-
+var trial_in_block_index = -1
 selection selection_trial_index (
     values = 0:n_trials_max
     selection = sequential_ascending
@@ -106,18 +106,14 @@ var subject_id = 0
     n_failure = 0
     n_ignore = 0
     reset_selection (selection_trial_index)
+    trial_in_block_index = -1
 %end
 
 %define reset_trial_vars ()
     success = 0
     failure = 0
     ignore = 1
-    card_b = 0
-    /*
-    if mouse {
-        move_mouse_cursor (device=pointer; x_position=0; y_position=0)
-    }
-    */
+    card_b = 0 
 %end
 
 /*
