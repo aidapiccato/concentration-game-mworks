@@ -58,9 +58,9 @@ group 'Python variables' {
 ////////// experiment level macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-%define n_cycles = 3 // number of times all cards in each config are cycled through
+%define n_cycles = 4 // number of times all cards in each config are cycled through
 %define n_configs = 4 // number of different configuration sizes
-%define n_config_repeats = 4 // number of times a configuration size is repeated
+%define n_config_repeats = 8 // number of times a configuration size is repeated
 %define n_blocks = n_config_repeats * n_configs
 %define n_cards_max = 25
 
@@ -113,7 +113,7 @@ var subject_id = 0
     success = 0
     failure = 0
     ignore = 1
-    card_b = 0 
+    card_b = 0
 %end
 
 /*
