@@ -13,7 +13,6 @@ def hline(ax, y):
 
 
 def fit_line(ax, x, y):
-
     if type(y) is pd.Series:
         is_nan = y.isnull()
         y = y[~is_nan]
