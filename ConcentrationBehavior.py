@@ -15,7 +15,7 @@ TRIAL_END = 6
 
 max_grid_dims = [5, 5]
 
-username = 'apiccato'
+username = 'aidapiccato'
 dir_path = '/Users/%s/PyCharmProjects/concentration/concentration-game-mworks' % username
 fpath = '/Users/%s/Documents/MWorks/Data' % username
 
@@ -197,11 +197,17 @@ class ConcentrationBehavior(object):
 
         return scalar, start_sync_t, end_sync_t, n_trials
 
+    def get_metadata(self):
+        trials_metadata = pd.concat([self.scalar.card_a, self.scalar.trial_in_block_index,
+                              self.scalar.block_index, self.scalar.grid, self.scalar.grid_dims, self.scalar.n_pairs], axis=1)
+        blocks_metadata = trials_metadata.groupby(['block_index']).first()[['grid', 'grid_dims', 'n_pairs']]
+        return trials_metadata, blocks_metadata
+
     def unpack(self, f, start_sync_t, end_sync_t):
         """
             Extracts data for codenames for each trial
             :return:
-            """
+        """
         unpacked = {}
         for c in self.codenames:
             unpacked[c] = []
