@@ -1,8 +1,0 @@
-var pointer_x = 0
-var pointer_y = 0
-var mouse_down = 0
-mouse_input pointer (
-    mouse_position_x = pointer_x
-    mouse_position_y = pointer_y
-    mouse_down = mouse_down
-)
