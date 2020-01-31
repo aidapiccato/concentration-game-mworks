@@ -18,7 +18,7 @@ N_CONFIG_REPEATS = 8 # number of times each configuration is repeated (each time
 
 N_CYCLES = 4
 
-# subject_id = getvar('subject_id')
+subject_id = getvar('subject_id')
 
 def get_block_metaparameters_ios():
     block_index = int(getvar('block_index'))
