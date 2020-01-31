@@ -18,7 +18,7 @@ N_CONFIG_REPEATS = 8 # number of times each configuration is repeated (each time
 
 N_CYCLES = 4
 
-subject_id = getvar('subject_id')
+# subject_id = getvar('subject_id')
 
 def get_block_metaparameters_ios():
     block_index = int(getvar('block_index'))
@@ -37,14 +37,13 @@ def generate_block(subject_id, block_index):
     seed = hash((subject_id, block_index)) % (2**32 - 1) # seed must be in this range
     # list of grid sizes (generate using subject_id as seed)
     np.random.seed(subject_id)
-    configs = np.random.permutation(np.repeat(ALL_N_PAIRS, N_CONFIG_REPEATS))
-    # making sure that no adjacent grids are of the same size
-    adj = [configs[i] == configs[i - 1] or configs[i] == configs[i + 1] for i in np.arange(1, len(configs) - 1, 2)]
-    switch = np.where(adj)[0] * 2 + 1
-    for i in range(len(switch[:-1])):
-        temp = configs[switch[i]]
-        configs[switch[i]] = configs[switch[i + 1]]
-        configs[switch[i + 1]] = temp
+    configs = np.tile(ALL_N_PAIRS, N_CONFIG_REPEATS)
+    # shuffling to insure that adjacent arrays are not of the same size
+    for i in range(N_CONFIG_REPEATS):
+        np.random.seed(subject_id)
+        configs[i*N_CONFIG_REPEATS:i*N_CONFIG_REPEATS+len(ALL_N_PAIRS)] = np.random.permutation(
+            configs[i*N_CONFIG_REPEATS:i*N_CONFIG_REPEATS+len(ALL_N_PAIRS)])
+
     # select current block size using block index
     n_pairs = configs[block_index]
     # create grid

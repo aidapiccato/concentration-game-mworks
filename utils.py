@@ -1,11 +1,11 @@
 import numpy as np
 import pickle as pk
 
-username = 'aidapiccato'
-# username = 'apiccato'
+# username = 'aidapiccato'
+username = 'apiccato'
 
-# dir_path = '/Users/%s/PyCharmProjects/concentration/concentration-game-mworks' % username
-dir_path = '/Users/aidapiccato/Documents/MWorks/Data'
+dir_path = '/Users/%s/PyCharmProjects/concentration/concentration-game-mworks' % username
+# dir_path = '/Users/aidapiccato/Documents/MWorks/Data'
 subject_id = getvar('subject_id')
 
 subject_fn = '%s/subject_%s.pkl' % (dir_path, subject_id)
