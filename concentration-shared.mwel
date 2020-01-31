@@ -41,7 +41,7 @@ group 'Trial variables' {
 group 'Timer duration variables' {
     var choice_dur = 4s
     var feedback_dur = 500ms
-    var iti_dur = 0.5s
+    var iti_dur = 500ms
     var block_dur = 30s
 }
 
