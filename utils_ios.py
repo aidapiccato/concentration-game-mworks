@@ -9,18 +9,18 @@ CONFIGS = { # mapping number of pairs to possible configurations
     4: [3, 3],
     8: [4, 4],
     12: [5, 5],
-    # 18: [6, 6]
 }
 
-ALL_N_PAIRS = [2, 4, 8, 12] # possible number of pairs in a configuration; removed 18
+ALL_N_PAIRS = [2, 4, 8, 12] # possible number of pairs in a configuratin_config_repeatsN_CONFIG_REPEATS = 8 # number of times each configuration is repeated (each time with unique image layout)
 
-N_CONFIG_REPEATS = 8 # number of times each configuration is repeated (each time with unique image layout)
+N_CONFIG_REPEATS = 8
 
 N_CYCLES = 4
 
-subject_id = getvar('subject_id')
+
 
 def get_block_metaparameters_ios():
+    subject_id = int(getvar('subject_id'))
     block_index = int(getvar('block_index'))
     n_pairs, grid, grid_dims, inv_grid, trials = generate_block(subject_id, block_index)
     setvar('py_n_pairs', n_pairs)
@@ -78,11 +78,6 @@ def generate_block(subject_id, block_index):
     trials = np.random.permutation(np.repeat(choices, N_CYCLES))
 
     return n_pairs, grid, grid_dims, inv_grid, trials
-
-
-
-
-
 
 
 
