@@ -1,7 +1,6 @@
 import numpy as np
 import pickle as pkl
 import datetime
-
 N_SESSIONS = 10
 MAX_N_IMAGES = 36
 MAX_N_PAIRS = 18
@@ -36,7 +35,6 @@ def get_block_metaparameters():
     setvar('py_grid', grid)
     setvar('py_inv_grid', inv_grid)
     setvar('py_trials', trials)
-
 
 ########################################################################################################################
 
