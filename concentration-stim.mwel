@@ -21,7 +21,8 @@ stimulus_display (
 var break_start_time = 0
 
 text break_prompt (
-    text = 'You can now take a short break, after which you will move on to a new grid. The task will resume in ' + (string)(30 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
+    text = 'You got ' + (string)(round((n_success/n_trials_total)*100)) + '% of trials correct! You will now move on to a new grid. The task will resume in ' + (string)(5 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
+    // text = 'You can now take a short break, after which you will move on to a new grid. The task will resume in ' + (string)(5 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
     font_name = 'Helvetica Neue'
     font_size = 30
     x_size = 30.0
@@ -85,7 +86,7 @@ text break_prompt (
 stimulus_group card_image_stims {
     for_each_image {
          image_file 'img_stim_${image_index}' (
-                path = "/Users/aidapiccato/PyCharmProjects/concentration/concentration-game-mworks/boss_images/${image_index}.jpg"
+                path = "/Users/apiccato/PyCharmProjects/concentration/concentration-game-mworks/resources/boss_images/${image_index}.jpg"
                 x_size = stim_size
                 x_position = image_x_pos
                 y_position = image_y_pos

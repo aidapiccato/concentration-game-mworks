@@ -1,5 +1,6 @@
 import numpy as np
-import pickle as pk
+import pickle as pkl
+import datetime
 
 N_SESSIONS = 10
 MAX_N_IMAGES = 36
@@ -13,13 +14,23 @@ GRID_DIMS = {
 ALL_N_PAIRS = [2, 4, 8, 12]
 N_CONFIG_REPEATS = 10
 N_CYCLES = 4
+version = 1
+
+# def add_sess():
+#     subject_id = int(getvar('subject_id'))
+#     sess_index = int(getvar('sess_index'))
+#     sessions = subject_sess[subject_sess.subject_id == subject_id]
+#     session = {'subject_id': subject_id, 'date': datetime.datetime.now().strftime('%x'), 'sess_index': sess_index}
+#     sessions = sessions.append(session, ignore_index=True)
+#     with open(subject_sess_dirpath, 'wb') as g:
+#         pkl.dump(sessions, g)
 
 
-def get_block_metaparameters_ios():
+def get_block_metaparameters():
     subject_id = int(getvar('subject_id'))
     sess_index = int(getvar('sess_index'))
     block_index = int(getvar('block_index'))
-    n_pairs, grid, grid_dims, inv_grid, trials = generate_block(subject_id, sess_index, block_index)
+    n_pairs, grid, grid_dims, inv_grid, trials = get_block(subject_id, sess_index, block_index)
     setvar('py_n_pairs', n_pairs)
     setvar('py_grid_dims', grid_dims)
     setvar('py_grid', grid)
@@ -46,6 +57,7 @@ class Session(object):
     def __init__(self, subject_id, sess_index, ):
         seed = hash((subject_id, sess_index)) % (2 ** 32 - 1)
         blocks = np.tile(ALL_N_PAIRS, N_CONFIG_REPEATS)
+        # creates list of blocks for current session/subject
         for i in range(N_CONFIG_REPEATS):
             np.random.seed(seed + i)
             blocks[i * len(ALL_N_PAIRS):i * len(ALL_N_PAIRS) + len(ALL_N_PAIRS)] = np.random.permutation(
@@ -62,6 +74,7 @@ class Block(object):
         if self.grid_dims[0] % 2 != 0:
             self.grid = np.append(self.grid, n_pairs)
         np.random.seed(self.seed)
+        np.random.shuffle(self.grid)
         img_ixs = 2 * np.repeat(np.random.choice(np.arange(MAX_N_PAIRS), size=(n_pairs, 1), replace=False), 2) \
                   + np.tile([0, 1], n_pairs)
         if self.grid_dims[0] % 2 != 0:

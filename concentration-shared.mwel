@@ -42,10 +42,12 @@ group 'Timer duration variables' {
     var choice_dur = 4s
     var feedback_dur = 500ms
     var iti_dur = 0.5s
-    var block_dur = 30s
+    var block_dur = 5s
+    // var block_dur = 30s
 }
 
 group 'Python variables' {
+    var py_sess_index = -1
     var py_n_pairs = 0
     var py_grid_dims = [0, 0]
     var py_feedback = 0
@@ -69,6 +71,8 @@ group 'Python variables' {
 %define n_trials_max = n_cycles * n_cards_max // maximum number of possible trials
 %define n_trials_total = n_cycles * n_images_pairs  // number of trials for current block
 
+var sess_index = -1
+
 var block_index = -1
 var trial_index = -1
 var trial_in_block_index = -1
@@ -90,16 +94,7 @@ var subject_id = 0
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////// update macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-%define update_block_meta ()
-   block_index = block_index + 1
-   run_python_string(get_block_metaparameters())
-   n_pairs = py_n_pairs
-   grid = py_grid
-   inv_grid = py_inv_grid
-   grid_dims = py_grid_dims
-%end
-*/
+
 %define reset_block_vars ()
     flipped = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     n_success = 0
@@ -115,14 +110,6 @@ var subject_id = 0
     ignore = 1
     card_b = 0
 %end
-
-/*
-%define update_trial_meta ()
-    trial_index = selection_trial_index
-    run_python_string(get_trial_metaparameters())
-    card_a = py_card_a
-%end
-*/
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

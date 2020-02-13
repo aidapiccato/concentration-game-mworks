@@ -6,8 +6,6 @@
 
 %include 'concentration-shared'
 
-subject_id = 10
-
 %define update_trial_meta ()
     card_a = trials[selection_trial_index]
     trial_index = trial_index + 1
@@ -16,13 +14,15 @@ subject_id = 10
 
 %define update_block_meta ()
    block_index = block_index + 1
-   run_python_string(get_block_metaparameters_ios())
+   run_python_string( get_block_metaparameters() )
    n_pairs = py_n_pairs
    grid = py_grid
    inv_grid = py_inv_grid
    grid_dims = py_grid_dims
    trials = py_trials
 %end
+
+
 
 %define refresh_vars_for_sync ()
     block_index = block_index
@@ -41,10 +41,13 @@ subject_id = 10
 %end
 
 
-protocol 'Concentration - iOS' {
+protocol '1. Load subject and session' {
+}
+
+protocol '2. Run task' {
     touch = 1
     mouse = 0
-    run_python_file ('utils_ios.py')
+    run_python_file ('resources/utils_ios.py')
     feedback = 0
     block (nsamples = n_blocks; sampling_method = cycles; selection = sequential_ascending) {
 
@@ -67,7 +70,7 @@ protocol 'Concentration - iOS' {
                     sync = 0
                     goto (
                         target = 'Block break'
-                        when = selection_trial_index == n_trials_total and (block_index + 1) % 2 == 0
+                        when = selection_trial_index == n_trials_total // and (block_index + 1) % 2 == 0
                     )
                     goto (
                         target = 'Yield'
