@@ -1,0 +1,433 @@
+//
+// Resources
+//
+
+resource (letters)
+resource (numbers)
+resource (sounds)
+
+
+//
+// I/O
+//
+
+stimulus_display (background_color = 0.5, 0.5, 0.5)
+
+var touch_x = 0
+var touch_y = 0
+var touch_active = false
+
+touch_input (
+    touch_position_x = touch_x
+    touch_position_y = touch_y
+    touch_in_progress = touch_active
+    autostart = true
+    )
+
+
+
+//
+// Trial start button
+//
+
+var start_button_size = 4
+var touch_on_start_button = false
+
+circular_fixation_point start_button (
+    trigger_width = start_button_size
+    trigger_watch_x = touch_x
+    trigger_watch_y = touch_y
+    trigger_flag = touch_on_start_button
+    x_size = start_button_size
+    y_size = start_button_size
+    )
+
+
+//
+// Data collection start button
+//
+
+var data_collection_start_button_size_x = 8
+var data_collection_start_button_size_y = 4
+var data_collection_start_button_pos_x = 15
+var data_collection_start_button_pos_y = 12
+var touch_on_data_collection_start_button = false
+
+fixation_point data_collection_start_button (
+    trigger_width = max(data_collection_start_button_size_x, data_collection_start_button_size_y)
+    trigger_watch_x = touch_x
+    trigger_watch_y = touch_y
+    trigger_flag = touch_on_data_collection_start_button
+    color = 0,1,0
+    x_size = data_collection_start_button_size_x
+    y_size = data_collection_start_button_size_y
+    x_position = data_collection_start_button_pos_x
+    y_position = data_collection_start_button_pos_y
+    )
+
+text data_collection_start_button_text (
+    text = 'Start data collection'
+    font_name = 'HelveticaNeue'
+    font_size = 28
+    text_alignment = center
+    color = 0,0,0
+    x_size = data_collection_start_button_size_x - 1
+    y_size = data_collection_start_button_size_y - 1
+    x_position = data_collection_start_button_pos_x
+    y_position = data_collection_start_button_pos_y
+    )
+
+
+//
+// Images
+//
+
+%define LEFT = 0
+%define RIGHT = 1
+
+var image_filenames = [
+    filenames('letters/*.png'),
+    filenames('numbers/*.png')
+]
+
+var image_size_x = 8
+var image_size_y = 8
+
+var sample_image_path = ''
+var sample_image_pos_x = 0
+var sample_image_pos_y = 4
+
+image_file sample_image (
+    path = sample_image_path
+    x_size = image_size_x
+    y_size = image_size_y
+    x_position = sample_image_pos_x
+    y_position = sample_image_pos_y
+    deferred = explicit
+    // announce_load = false
+    )
+
+var left_image_path = ''
+var left_image_pos_x = -10
+var left_image_pos_y = -4
+
+selection left_image_selection (
+    values = 0 : size(image_filenames[LEFT]) - 1
+    selection = random_without_replacement
+    )
+
+image_file left_image (
+    path = left_image_path
+    x_size = image_size_x
+    y_size = image_size_y
+    x_position = left_image_pos_x
+    y_position = left_image_pos_y
+    deferred = explicit
+    // announce_load = false
+    )
+
+var right_image_path = ''
+var right_image_pos_x = 10
+var right_image_pos_y = -4
+
+selection right_image_selection (
+    values = 0 : size(image_filenames[RIGHT]) - 1
+    selection = random_without_replacement
+    )
+
+image_file right_image (
+    path = right_image_path
+    x_size = image_size_x
+    y_size = image_size_y
+    x_position = right_image_pos_x
+    y_position = right_image_pos_y
+    deferred = explicit
+    // announce_load = false
+    )
+
+
+//
+// Touch triggers
+//
+
+var trigger_width = 8
+var touch_on_left_image = false
+var touch_on_right_image = false
+
+fixation_point left_trigger (
+    trigger_width = trigger_width
+    trigger_watch_x = touch_x
+    trigger_watch_y = touch_y
+    trigger_flag = touch_on_left_image
+    x_size = image_size_x
+    y_size = image_size_y
+    x_position = left_image_pos_x
+    y_position = left_image_pos_y
+    alpha_multiplier = 0
+    )
+
+fixation_point right_trigger (
+    trigger_width = trigger_width
+    trigger_watch_x = touch_x
+    trigger_watch_y = touch_y
+    trigger_flag = touch_on_right_image
+    x_size = image_size_x
+    y_size = image_size_y
+    x_position = right_image_pos_x
+    y_position = right_image_pos_y
+    alpha_multiplier = 0
+    )
+
+
+//
+// Feedback
+//
+
+var feedback_size_x = 15
+var feedback_size_y = 15
+
+rectangle correct_feedback (
+    color = 0,1,0
+    x_size = feedback_size_x
+    y_size = feedback_size_y
+    )
+
+rectangle incorrect_feedback (
+    color = 0,0,0
+    x_size = feedback_size_x
+    y_size = feedback_size_y
+    )
+
+
+//
+// Sounds
+//
+
+wav_file correct_sound ('sounds/reward.wav')
+wav_file incorrect_sound ('sounds/failure.wav')
+
+
+//
+// Task
+//
+
+var inter_trial_interval = 2s
+var post_start_button_presentation_duration = 500ms
+var sample_presentation_duration = 1s
+var post_sample_presentation_duration = 500ms
+var image_selection_timeout = 5s
+var reward_duration = 100ms
+var correct_feedback_presentation_duration = 1s
+var incorrect_feedback_presentation_duration = 3s
+
+var sample_imageset = 0
+
+var num_premature = 0
+var num_correct = 0
+var num_incorrect = 0
+var num_ignored = 0
+var num_trials = 0
+
+var collecting_data = false
+
+%define start_timer (duration)
+    action/start_timer (
+        timer = MyTimer
+        duration = duration
+        )
+%end
+
+%define on_timeout_goto (target)
+    goto (
+        target = target
+        when = timer_expired(MyTimer)
+        )
+%end
+
+protocol 'iOS Test' {
+    collecting_data = false
+
+    task {
+        state 'Clear Results' {
+            num_premature = 0
+            num_correct = 0
+            num_incorrect = 0
+            num_ignored = 0
+            num_trials = 0
+
+            goto ('Begin Trial')
+        }
+
+        state 'Begin Trial' {
+            start_timer (inter_trial_interval)
+
+            unload_stimulus (sample_image)
+            unload_stimulus (left_image)
+            unload_stimulus (right_image)
+
+            reset_selection (left_image_selection)
+            reset_selection (right_image_selection)
+
+            sample_imageset = disc_rand(min(LEFT, RIGHT), max(LEFT, RIGHT))
+            if (sample_imageset == LEFT) {
+                next_selection (left_image_selection)
+                sample_image_path = image_filenames[LEFT][left_image_selection]
+                report ('$sample_image_path')
+            }
+            if (sample_imageset == RIGHT) {
+                next_selection (right_image_selection)
+                sample_image_path = image_filenames[RIGHT][right_image_selection]
+            }
+            load_stimulus (sample_image)
+
+            next_selection (left_image_selection)
+            left_image_path = image_filenames[LEFT][left_image_selection]
+            load_stimulus (left_image)
+
+            next_selection (right_image_selection)
+            right_image_path = image_filenames[RIGHT][right_image_selection]
+            load_stimulus (right_image)
+
+            assert (!timer_expired(MyTimer))
+
+            on_timeout_goto ('Present Start Button')
+        }
+
+        state 'Present Start Button' {
+            queue_stimulus (start_button)
+            if (not collecting_data) {
+                queue_stimulus (data_collection_start_button)
+                queue_stimulus (data_collection_start_button_text)
+            }
+            update_display ()
+
+            goto (
+                target = 'Post Start Button Presentation'
+                when = touch_on_start_button && touch_active
+                )
+            goto (
+                target = 'Start Data Collection'
+                when = !collecting_data && touch_on_data_collection_start_button && touch_active
+                )
+        }
+
+        state 'Start Data Collection' {
+            collecting_data = true
+            clear_display ()
+
+            goto ('Clear Results')
+        }
+
+        state 'Post Start Button Presentation' {
+            clear_display ()
+            start_timer (post_start_button_presentation_duration)
+
+            on_timeout_goto ('Present Image')
+        }
+
+        state 'Present Image' {
+            queue_stimulus (sample_image)
+            update_display ()
+            start_timer (sample_presentation_duration)
+
+            on_timeout_goto ('Post Image Presentation')
+        }
+
+        state 'Post Image Presentation' {
+            clear_display ()
+            start_timer (post_sample_presentation_duration)
+
+            goto (
+                target = 'Premature Response'
+                when = touch_active
+                )
+            on_timeout_goto ('Selection')
+        }
+
+        state 'Premature Response' {
+            num_premature += 1
+            report ('Premature response')
+
+            goto ('End Trial')
+        }
+
+        state 'Selection' {
+            queue_stimulus (left_image)
+            queue_stimulus (right_image)
+            update_display ()
+            start_timer (image_selection_timeout)
+
+            goto (
+                target = 'Correct Selection'
+                when = (sample_imageset == LEFT) && touch_on_left_image && touch_active
+                )
+            goto (
+                target = 'Incorrect Selection'
+                when = (sample_imageset == RIGHT) && touch_on_left_image && touch_active
+                )
+            goto (
+                target = 'Correct Selection'
+                when = (sample_imageset == RIGHT) && touch_on_right_image && touch_active
+                )
+            goto (
+                target = 'Incorrect Selection'
+                when = (sample_imageset == LEFT) && touch_on_right_image && touch_active
+                )
+            on_timeout_goto ('No Selection')
+        }
+
+        state 'No Selection' {
+            num_ignored += 1
+            report ('No selection')
+
+            clear_display ()
+
+            goto ('End Trial')
+        }
+
+        state 'Correct Selection' (interruptible = false) {
+            num_correct += 1
+            report ('Correct selection')
+
+            dequeue_stimulus (left_image)
+            dequeue_stimulus (right_image)
+            queue_stimulus (correct_feedback)
+            update_display ()
+
+            play_sound (correct_sound)
+
+
+            wait (reward_duration)
+
+
+            wait (correct_feedback_presentation_duration)
+
+            clear_display ()
+
+            goto ('End Trial')
+        }
+
+        state 'Incorrect Selection' {
+            num_incorrect += 1
+            report ('Incorrect selection')
+
+            dequeue_stimulus (left_image)
+            dequeue_stimulus (right_image)
+            queue_stimulus (incorrect_feedback)
+            update_display ()
+
+            play_sound (incorrect_sound)
+            wait (incorrect_feedback_presentation_duration)
+
+            clear_display ()
+
+            goto ('End Trial')
+        }
+
+        state 'End Trial' {
+            num_trials += 1
+
+            goto ('Begin Trial')
+        }
+    }
+}
