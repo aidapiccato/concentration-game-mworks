@@ -38,6 +38,7 @@ group 'Trial variables' {
     var failure = 0
     var ignore = 0
 }
+
 group 'Timer duration variables' {
     var choice_dur = 4s
     var feedback_dur = 500ms

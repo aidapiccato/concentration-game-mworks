@@ -154,6 +154,7 @@ protocol '2. Run task' {
                     next_selection (selection_trial_index)
 
                     sync = TRIAL_END
+
                     yield ()
                 }
             }
