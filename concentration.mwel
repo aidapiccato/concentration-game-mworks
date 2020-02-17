@@ -49,12 +49,23 @@ image_file card_b_image (
 )
 
 var grid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-var image_filenames = filenames('boss_images/*.jpg')
+var image_filenames = filenames('curr_images/*.jpg')
 
 %define load_card_a ()
     card_a_image_path = image_filenames[grid[card_a]]
     load_stimulus (card_a_image)
     queue_stimulus (card_a_image)
+%end
+
+%define unload_card_a ()
+    dequeue_stimulus (card_a_image)
+    unload_stimulus (card_a_image)
+%end
+
+%define unload_card_b ()
+    dequeue_stimulus (card_b_image)
+    unload_stimulus (card_b_image)
+
 %end
 
 %define load_card_b ()

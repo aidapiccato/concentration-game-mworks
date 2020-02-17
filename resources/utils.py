@@ -70,7 +70,7 @@ class Block(object):
     def __init__(self, n_pairs, subject_id, sess_index, block_index):
         self.seed = hash((subject_id, sess_index, block_index)) % (2 ** 32 - 1)
         self.n_pairs = n_pairs
-        # self.grid = np.repeat(np.arange(n_pairs), 2)
+
         self.grid = np.arange(block_index * (MAX_N_PAIRS + 1), (block_index + 1) * (MAX_N_PAIRS + 1), step=1)
         self.grid_dims = GRID_DIMS[n_pairs]
         self.n_images = self.n_pairs * 2 + (self.grid_dims[0] % 2) * 1
@@ -86,6 +86,5 @@ class Block(object):
         if self.grid_dims[0] % 2 != 0:
             choices = np.where(self.grid != oddball)[0]
 
-        # trials
         np.random.seed(self.seed)
         self.trials = np.random.permutation(np.repeat(choices, N_CYCLES))
