@@ -1,247 +1,274 @@
+%include 'concentration-ios-io'
 
-// TEMPORARY VAR DECLARATIONS
-var stim_size = 4
-var x_offset = 0
-var y_offset = 0
-var stim_dist = 2
-//
+%define effector_x = touch_position_x
+%define effector_y = touch_position_y
+%define effector_down = touch_in_progress
 
-%define x_offset = (grid_dims[1]/2  - 0.5) * stim_size + (grid_dims[1]/2 - 0.5) * stim_dist
-%define y_offset = (grid_dims[0]/2 - 0.5)  * stim_size + (grid_dims[0]/2 - 0.5) * stim_dist
+resource ( curr_images )
+resource ( 'resources' )
 
-%define card_x_index_f (index) index % grid_dims[1]
-%define card_y_index_f (index) floor(index / grid_dims[1]) * -1
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// experiment level macros
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-%define card_x_pos_f (index)  (card_x_index_f (index)) * (stim_size) + (card_x_index_f (index)) * (stim_dist) - x_offset
-%define card_y_pos_f (index)  (card_y_index_f (index)) * (stim_size) + (card_y_index_f (index)) * (stim_dist) + y_offset
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-var card_a_image_path = ''
-var card_b_image_path = ''
-
-%define card_a_pos_x = card_x_pos_f (card_a)
-%define card_a_pos_y = card_y_pos_f (card_a)
-
-%define card_b_pos_x = card_x_pos_f (card_b)
-%define card_b_pos_y = card_y_pos_f (card_b)
-
-var card_a = 0
-var card_b = 0
-
-image_file card_a_image (
-    path = card_a_image_path
-    x_size = stim_size
-    y_size = stim_size
-    x_position = card_a_pos_x
-    y_position = card_a_pos_y
-    deferred = explicit
-)
-
-image_file card_b_image (
-    path = card_b_image_path
-    x_size = stim_size
-    y_size = stim_size
-    x_position = card_b_pos_x
-    y_position = card_b_pos_y
-    deferred = explicit
-)
-
-var grid = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-var image_filenames = filenames('curr_images/*.jpg')
-
-%define load_card_a ()
-    card_a_image_path = image_filenames[grid[card_a]]
-    load_stimulus (card_a_image)
-    queue_stimulus (card_a_image)
-%end
-
-%define unload_card_a ()
-    dequeue_stimulus (card_a_image)
-    unload_stimulus (card_a_image)
-%end
-
-%define unload_card_b ()
-    dequeue_stimulus (card_b_image)
-    unload_stimulus (card_b_image)
-
-%end
-
-%define load_card_b ()
-    card_b_image_path = image_filenames[grid[card_b]]
-    load_stimulus (card_b_image)
-    queue_stimulus (card_b_image)
-%end
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-%define target_color = 0.25
-%define target_visible (index) index < (n_images) and sync != BLOCK_BREAK
-
-%define target (x_position, y_position, trigger_flag, index)
-    fixation_point (
-        color = target_color, target_color, target_color
-        x_size = stim_size
-        x_position = x_position
-        y_position = y_position
-        trigger_width = stim_size
-        trigger_watch_x = effector_x
-        trigger_watch_y = effector_y
-        trigger_flag = trigger_flag
-        alpha_multiplier = target_visible (index)
-    )
-%end
-
-group 'Trigger flag variables' {
-    var tf0 = 0
-    var tf1 = 0
-    var tf2 = 0
-    var tf3 = 0
-    var tf4 = 0
-    var tf5 = 0
-    var tf6 = 0
-    var tf7 = 0
-    var tf8 = 0
-    var tf9 = 0
-    var tf10 = 0
-    var tf11 = 0
-    var tf12 = 0
-    var tf13 = 0
-    var tf14 = 0
-    var tf15 = 0
-    var tf16 = 0
-    var tf17 = 0
-    var tf18 = 0
-    var tf19 = 0
-    var tf20 = 0
-    var tf21 = 0
-    var tf22 = 0
-    var tf23 = 0
-    var tf24 = 0
-    var tf25 = 0
-    var tf26 = 0
-    var tf27 = 0
-    var tf28 = 0
-    var tf29 = 0
-    var tf30 = 0
-    var tf31 = 0
-    var tf32 = 0
-    var tf33 = 0
-    var tf34 = 0
-    var tf35 = 0
-
-
+group 'Trial variables' {
+    var card_a = 0
+    var card_b = 0
+    var success = 0
+    var failure = 0
+    var ignore = 0
 }
-var tfs = [tf0, tf1, tf2, tf3, tf4, tf5,
-    tf6, tf7, tf8, tf9, tf10,
-    tf11, tf12, tf13, tf14, tf15,
-    tf16, tf17, tf18, tf19, tf20, tf21, tf22, tf23,
-    tf24, tf25, tf26, tf27, tf28, tf29, tf30, tf31,
-    tf32, tf33, tf34, tf35 ]
 
-target target0 (x_position = card_x_pos_f (0); y_position = card_y_pos_f (0); trigger_flag = tf0; index = 0)
-target target1 (x_position = card_x_pos_f (1); y_position = card_y_pos_f (1); trigger_flag = tf1; index = 1)
-target target2 (x_position = card_x_pos_f (2); y_position = card_y_pos_f (2); trigger_flag = tf2; index = 2)
-target target3 (x_position = card_x_pos_f (3); y_position = card_y_pos_f (3); trigger_flag = tf3; index = 3)
-target target4 (x_position = card_x_pos_f (4); y_position = card_y_pos_f (4); trigger_flag = tf4; index = 4)
-target target5 (x_position = card_x_pos_f (5); y_position = card_y_pos_f (5); trigger_flag = tf5; index = 5)
-target target6 (x_position = card_x_pos_f (6); y_position = card_y_pos_f (6); trigger_flag = tf6; index = 6)
-target target7 (x_position = card_x_pos_f (7); y_position = card_y_pos_f (7); trigger_flag = tf7; index = 7)
-target target8 (x_position = card_x_pos_f (8); y_position = card_y_pos_f (8); trigger_flag = tf8; index = 8)
-target target9 (x_position = card_x_pos_f (9); y_position = card_y_pos_f (9); trigger_flag = tf9; index = 9)
-target target10 (x_position = card_x_pos_f (10); y_position = card_y_pos_f (10); trigger_flag = tf10; index = 10)
-target target11 (x_position = card_x_pos_f (11); y_position = card_y_pos_f (11); trigger_flag = tf11; index = 11)
-target target12 (x_position = card_x_pos_f (12); y_position = card_y_pos_f (12); trigger_flag = tf12; index = 12)
-target target13 (x_position = card_x_pos_f (13); y_position = card_y_pos_f (13); trigger_flag = tf13; index = 13)
-target target14 (x_position = card_x_pos_f (14); y_position = card_y_pos_f (14); trigger_flag = tf14; index = 14)
-target target15 (x_position = card_x_pos_f (15); y_position = card_y_pos_f (15); trigger_flag = tf15; index = 15)
-target target16 (x_position = card_x_pos_f (16); y_position = card_y_pos_f (16); trigger_flag = tf16; index = 16)
-target target17 (x_position = card_x_pos_f (17); y_position = card_y_pos_f (17); trigger_flag = tf17; index = 17)
-target target18 (x_position = card_x_pos_f (18); y_position = card_y_pos_f (18); trigger_flag = tf18; index = 18)
-target target19 (x_position = card_x_pos_f (19); y_position = card_y_pos_f (19); trigger_flag = tf19; index = 19)
-target target20 (x_position = card_x_pos_f (20); y_position = card_y_pos_f (20); trigger_flag = tf20; index = 20)
-target target21 (x_position = card_x_pos_f (21); y_position = card_y_pos_f (21); trigger_flag = tf21; index = 21)
-target target22 (x_position = card_x_pos_f (22); y_position = card_y_pos_f (22); trigger_flag = tf22; index = 22)
-target target23 (x_position = card_x_pos_f (23); y_position = card_y_pos_f (23); trigger_flag = tf23; index = 23)
-target target24 (x_position = card_x_pos_f (24); y_position = card_y_pos_f (24); trigger_flag = tf24; index = 24)
-target target25 (x_position = card_x_pos_f (25); y_position = card_y_pos_f (25); trigger_flag = tf25; index = 25)
-target target26 (x_position = card_x_pos_f (26); y_position = card_y_pos_f (26); trigger_flag = tf26; index = 26)
-target target27 (x_position = card_x_pos_f (27); y_position = card_y_pos_f (27); trigger_flag = tf27; index = 27)
-target target28 (x_position = card_x_pos_f (28); y_position = card_y_pos_f (28); trigger_flag = tf28; index = 28)
-target target29 (x_position = card_x_pos_f (29); y_position = card_y_pos_f (29); trigger_flag = tf29; index = 29)
-target target30 (x_position = card_x_pos_f (30); y_position = card_y_pos_f (30); trigger_flag = tf30; index = 30)
-target target31 (x_position = card_x_pos_f (31); y_position = card_y_pos_f (31); trigger_flag = tf31; index = 31)
-target target32 (x_position = card_x_pos_f (32); y_position = card_y_pos_f (32); trigger_flag = tf32; index = 32)
-target target33 (x_position = card_x_pos_f (33); y_position = card_y_pos_f (33); trigger_flag = tf33; index = 33)
-target target34 (x_position = card_x_pos_f (34); y_position = card_y_pos_f (34); trigger_flag = tf34; index = 34)
-target target35 (x_position = card_x_pos_f (35); y_position = card_y_pos_f (35); trigger_flag = tf35; index = 35)
 
-%define display_targets ()
-    live_queue_stimulus (target0)
-    live_queue_stimulus (target1)
-    live_queue_stimulus (target2)
-    live_queue_stimulus (target3)
-    live_queue_stimulus (target4)
-    live_queue_stimulus (target5)
-    live_queue_stimulus (target6)
-    live_queue_stimulus (target7)
-    live_queue_stimulus (target8)
-    live_queue_stimulus (target9)
-    live_queue_stimulus (target10)
-    live_queue_stimulus (target11)
-    live_queue_stimulus (target12)
-    live_queue_stimulus (target13)
-    live_queue_stimulus (target14)
-    live_queue_stimulus (target15)
-    live_queue_stimulus (target16)
-    live_queue_stimulus (target17)
-    live_queue_stimulus (target18)
-    live_queue_stimulus (target19)
-    live_queue_stimulus (target20)
-    live_queue_stimulus (target21)
-    live_queue_stimulus (target22)
-    live_queue_stimulus (target23)
-    live_queue_stimulus (target24)
-    live_queue_stimulus (target25)
-    live_queue_stimulus (target26)
-    live_queue_stimulus (target27)
-    live_queue_stimulus (target28)
-    live_queue_stimulus (target29)
-    live_queue_stimulus (target30)
-    live_queue_stimulus (target31)
-    live_queue_stimulus (target32)
-    live_queue_stimulus (target33)
-    live_queue_stimulus (target34)
-    live_queue_stimulus (target35)
-%end
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-%define card_selected = (sync >= FLIP_CARD_A) * (effector_down) * (tf0 + tf1 + tf2 + tf3 + tf4 + tf5 + tf6 + tf7 + tf8 + tf9 + tf10 +  tf11 + tf12 + tf13 + tf14 + tf15 + tf16 + tf17 + tf18 + tf19 + tf20 + tf21 + tf22 + tf23 + tf24 + tf25 + tf26 + tf27 + tf28 + tf29 + tf30 + tf31 + tf32 + tf33 + tf34 + tf35)
+group 'Timer duration variables' {
+    var choice_dur = 4s
+    var feedback_dur = 500ms
+    var iti_dur = 0.5s
+    var block_dur = 5s
+    // var block_dur = 30s
+}
 
-%define read_card_selection ()
-    card_b = 0 * tf0 + 1 * tf1 + 2 * tf2 + 3 * tf3 + 4 * tf4 + 5 * tf5 + 6 * tf6 + 7 * tf7 + 8 * tf8 + 9 * tf9 + 10 * tf10 + 11 * tf11 + 12 * tf12 + 13 * tf13 + 14 * tf14 + 15 * tf15 + 16 * tf16 + 17 * tf17 + 18 * tf18 + 19 * tf19 + 20 * tf20 + 21 * tf21 + 22 * tf22 + 23 * tf23 + 24 * tf24 + 25 * tf25 + 26 * tf26 + 27 * tf27 + 28 * tf28 + 29 * tf29 + 30 * tf30 + 31 * tf31 + 32 * tf32 + 33 * tf33 + 34 * tf34 + 35 * tf35
-%end
 
-var break_start_time = 0
+group 'Configuration variables' {
+    var n_config_repeats = 8
+    var n_configs = 4
+    var n_cycles = 4
+    var n_cards_max = 25
+    var n_pairs = 8
+    var grid_dims = [2, 2]
+    var grid = [0, 0, 0, 0]
+    var n_images = 4s
+    var n_success = 0
+    var n_ignore = 0
+    var n_failure = 0
+    var feedback = 1
+    var n_trials = 25
+    var trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+}
 
-text break_prompt (
-    text = 'You got ' + (string)(round((n_success/n_trials_total)*100)) + '% of trials correct! You will now move on to a new grid. The task will resume in ' + (string)(5 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
-    // text = 'You can now take a short break, after which you will move on to a new grid. The task will resume in ' + (string)(5 - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
-    font_name = 'Helvetica Neue'
-    font_size = 30
-    x_size = 30.0
-    y_size = 10.0
+%define n_blocks = n_config_repeats * n_configs
+%define n_trials_max = n_cycles * n_cards_max // maximum number of possible trials
+
+%include 'concentration-stim'
+
+group 'Python variables' {
+    var py_n_cycles = 0
+    var py_n_cards_max = 0
+    var py_n_configs = 0
+    var py_n_config_repeats = 0
+    var py_sess_index = -1
+    var py_n_pairs = 0
+    var py_n_trials = 0
+    var py_grid_dims = [0, 0]
+    var py_feedback = 0
+    var py_grid = [0, 0, 0, 0]
+    var py_n_images = 0
+    var py_card_a = 0
+    var py_trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+}
+
+group 'Sync variables' {
+    var ITI = 1
+    var TRIAL_INIT = 2
+    var FLIP_CARD_A = 3
+    var FLIP_CARD_B = 4
+    var FEEDBACK = 5
+    var TRIAL_END = 6
+    var BLOCK_BREAK = 7
+}
+
+var sync = 0
+var sess_index = 0
+var subject_id = 3030
+var block_index = -1
+var trial_index = -1
+var trial_in_block_index = -1
+
+selection selection_trial_index (
+    values = 0:n_trials_max
+    selection = sequential_ascending
+    advance_on_accept = NO
+    autoreset = NO
 )
 
-%define display_message ()
-    break_start_time = next_frame_time ()
-    update_display ()
-    live_queue_stimulus (break_prompt)
-    update_display ()
+%define reset_trial_vars ()
+    success = 0
+    failure = 0
+    ignore = 1
+    card_b = 0
 %end
 
-%define hide_message()
-    dequeue_stimulus( break_prompt )
-    update_display()
+%define update_block_meta ()
+    block_index = block_index + 1
+    run_python_string( get_block_metaparameters() )
+    n_pairs = py_n_pairs
+    grid = py_grid
+    grid_dims = py_grid_dims
+    n_images = py_n_images
+    trials = py_trials
+    n_trials = py_n_trials
 %end
+
+%define update_trial_meta ()
+    card_a = trials[selection_trial_index]
+    trial_index = trial_index + 1
+    trial_in_block_index = trial_in_block_index + 1
+%end
+
+%define reset_block_vars ()
+    n_success = 0
+    n_failure = 0
+    n_ignore = 0
+    reset_selection (selection_trial_index)
+    trial_in_block_index = -1
+%end
+
+%define refresh_vars_for_sync ()
+    block_index = block_index
+    n_pairs = n_pairs
+    grid = grid
+    grid_dims = grid_dims
+    trials = trials
+    card_a = card_a
+    card_b = card_b
+    success = success
+    ignore = ignore
+    failure = failure
+    trial_index = trial_index
+    trial_in_block_index = trial_in_block_index
+%end
+
+%define evaluate ()
+    ignore = ignore or card_a == card_b
+    success = grid[card_b] == grid[card_a] * !ignore
+    failure = !success * !ignore
+%end
+
+protocol 'Load session' {
+    run_python_file ('resources/utils.py')
+    run_python_string ( get_session_metaparameters() )
+    n_cycles = py_n_cycles
+    n_configs = py_n_configs
+    n_cards_max = py_n_cards_max
+    n_config_repeats = py_n_config_repeats
+}
+
+var test = 0
+protocol 'Save session' {
+    run_python_file ('resources/utils.py')
+    run_python_string ( add_sess() )
+}
+
+protocol 'Run task' {
+    run_python_file ('resources/utils.py')
+    block (nsamples = n_blocks; sampling_method = cycles; selection = sequential_ascending) {
+
+        update_block_meta ()
+
+        reset_block_vars ()
+
+        display_targets ()
+
+        trial (nsamples = n_trials_max; sampling_method = samples) {
+
+            task {
+                state 'Transition' {
+                    sync = 0
+                    goto (
+                        target = 'Block break'
+                        when = selection_trial_index == n_trials_max // and (block_index + 1) % 2 == 0
+                    )
+                    goto (
+                        target = 'Yield'
+                        when = selection_trial_index >= n_trials
+                    )
+                    goto ( 'Intertrial interval' )
+                }
+                state 'Block break' {
+                    report('BLOCK BREAK')
+                    sync = BLOCK_BREAK
+                    display_message ()
+                    wait (block_dur)
+                    hide_message ()
+                    sync = 0
+                    goto ('Yield')
+                }
+                state 'Yield' {
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
+                    yield ()
+                }
+                state 'Intertrial interval' {
+                    sync = ITI
+                    reset_trial_vars ()
+                    wait (iti_dur)
+                    goto ('Trial init')
+                }
+                state 'Trial init' {
+                    sync = TRIAL_INIT
+                    update_trial_meta ()
+                    goto ( 'Flip first card' )
+                }
+                state 'Flip first card' {
+                    sync = FLIP_CARD_A
+                    load_card_a ()
+                    update_display ()
+                    start_timer (
+                        timer = choice_timer
+                        duration = choice_dur
+                    )
+                    goto (
+                        target = 'Flip second card'
+                        when = card_selected
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (choice_timer)
+                    )
+                }
+                state 'Flip second card' {
+                    sync = FLIP_CARD_B
+                    ignore = 0
+                    read_card_selection ()
+                    evaluate ()
+                    load_card_b ()
+                    update_display ()
+                    goto ( 'Feedback' )
+                }
+                state 'Feedback' {
+                    sync = FEEDBACK
+                    start_timer (
+                        timer = feedback_timer
+                        duration = feedback_dur
+                    )
+                    goto (
+                        target = 'Trial end'
+                        when = timer_expired (feedback_timer)
+                    )
+                }
+                state 'Trial end' {
+                    sync = TRIAL_END
+
+                    unload_card_a ()
+                    unload_card_b ()
+
+                    update_display ()
+
+                    n_success = n_success + success
+                    n_failure = n_failure + failure
+                    n_ignore = n_ignore + ignore
+
+                    refresh_vars_for_sync ()
+
+                    accept_selections (selection_trial_index)
+                    next_selection (selection_trial_index)
+
+                    sync = TRIAL_END
+                    yield ()
+                }
+            }
+        }
+    }
+}
