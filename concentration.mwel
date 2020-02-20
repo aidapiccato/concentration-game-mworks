@@ -203,6 +203,7 @@ protocol 'Run task' {
                     sync = 0
                     goto ( 'Transition' )
                 }
+
                 state 'Block break' {
                     report('BLOCK BREAK')
                     sync = BLOCK_BREAK
