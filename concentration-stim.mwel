@@ -8,7 +8,7 @@ stimulus_display (
 )
 
 
-var stim_size = 4
+var stim_size = 5
 var x_offset = 0
 var y_offset = 0
 var stim_dist = 2
@@ -88,7 +88,7 @@ var image_filenames = filenames(src_string + '/*.jpg')
 
 
 %define target_color = 0.25
-%define target_visible (index) index < (n_images) and sync != BLOCK_BREAK
+%define target_visible (index) index < (n_images) and sync != BLOCK_BREAK and sync != START_EXPERIMENT
 
 %define target (x_position, y_position, trigger_flag, index)
     fixation_point (
@@ -243,6 +243,36 @@ text break_prompt (
     x_size = 30.0
     y_size = 10.0
 )
+var start_trigger_flag = 0
+circular_fixation_point start_target(
+    color = 1, 0, 0
+    x_size = stim_size
+    x_position = 0
+    y_position = 0
+    trigger_width = stim_size
+    trigger_watch_x = effector_x
+    trigger_watch_y = effector_y
+    trigger_flag = start_trigger_flag
+
+)
+text start_prompt (
+    text = 'Press the red circle to begin the experiment'
+    font_name = 'Helvetica Neue'
+    font_size = 30
+    x_size = 30.0
+    y_size = 10.0
+)
+%define display_start_message ()
+    queue_stimulus (start_prompt)
+    queue_stimulus (start_target)
+    update_display ()
+%end
+
+%define hide_start_message()
+    dequeue_stimulus( start_prompt )
+    dequeue_stimulus( start_target )
+    update_display()
+%end
 
 %define display_message ()
     break_start_time = next_frame_time ()

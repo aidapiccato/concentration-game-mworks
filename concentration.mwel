@@ -48,7 +48,7 @@ group 'Configuration variables' {
     var trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
 
-var sync = 0
+var sync = -1
 var sess_index = 0
 var subject_id = 0
 var block_index = -1
@@ -77,6 +77,7 @@ group 'Python variables' {
 }
 
 group 'Sync variables' {
+    var START_EXPERIMENT = -1
     var ITI = 1
     var TRIAL_INIT = 2
     var FLIP_CARD_A = 3
@@ -176,10 +177,13 @@ protocol 'Run task' {
 
             task {
                 state 'Transition' {
-                    sync = 0
+                    goto (
+                        target = 'Start experiment'
+                        when = sync == START_EXPERIMENT
+                     )
                     goto (
                         target = 'Block break'
-                        when = selection_trial_index == n_trials_max // and (block_index + 1) % 2 == 0
+                        when = selection_trial_index == n_trials
                     )
                     goto (
                         target = 'Yield'
@@ -187,13 +191,24 @@ protocol 'Run task' {
                     )
                     goto ( 'Intertrial interval' )
                 }
+                state 'Start experiment' {
+                    display_start_message ()
+                    goto (
+                        target = 'Remove start message'
+                        when = effector_down * start_trigger_flag
+                    )
+                }
+                state 'Remove start message' {
+                    hide_start_message ()
+                    sync = 0
+                    goto ( 'Transition' )
+                }
                 state 'Block break' {
                     report('BLOCK BREAK')
                     sync = BLOCK_BREAK
                     display_message ()
                     wait (block_dur)
                     hide_message ()
-                    sync = 0
                     goto ('Yield')
                 }
                 state 'Yield' {
@@ -240,6 +255,7 @@ protocol 'Run task' {
                 }
                 state 'Feedback' {
                     sync = FEEDBACK
+                    feedback_dur = disc_rand(1, 2) * 500ms
                     start_timer (
                         timer = feedback_timer
                         duration = feedback_dur
