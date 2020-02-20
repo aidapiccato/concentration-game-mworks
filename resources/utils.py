@@ -5,8 +5,8 @@ import json
 
 
 VERSION = 1
-# dir = ''
-dir = '/Users/apiccato/PycharmProjects/concentration/concentration-game-mworks/'
+dir = ''
+# dir = '/Users/apiccato/PycharmProjects/concentration/concentration-game-mworks/'
 json_path = dir + 'resources/config.json'
 
 
