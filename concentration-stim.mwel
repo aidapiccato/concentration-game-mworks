@@ -6,12 +6,13 @@ stimulus_display (
     redraw_on_every_refresh = true
     announce_stimuli_on_implicit_updates = false
 )
-// TEMPORARY VAR DECLARATIONS
+
+
 var stim_size = 4
 var x_offset = 0
 var y_offset = 0
 var stim_dist = 2
-//
+
 
 %define x_offset = (grid_dims[1]/2  - 0.5) * stim_size + (grid_dims[1]/2 - 0.5) * stim_dist
 %define y_offset = (grid_dims[0]/2 - 0.5)  * stim_size + (grid_dims[0]/2 - 0.5) * stim_dist
@@ -55,7 +56,10 @@ image_file card_b_image (
     deferred = explicit
 )
 
-var image_filenames = filenames('curr_images/*.png')
+
+%define src_string = 'images/v' + (string)version + '/sess_' + (string)sess_index
+
+var image_filenames = filenames(src_string + '/*.jpg')
 
 %define load_card_a ()
     card_a_image_path = image_filenames[grid[card_a]]

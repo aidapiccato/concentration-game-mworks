@@ -4,8 +4,8 @@
 %define effector_y = touch_position_y
 %define effector_down = touch_in_progress
 
-resource ( curr_images )
 resource ( 'resources' )
+resource ( images )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////// experiment level macros
@@ -48,6 +48,13 @@ group 'Configuration variables' {
     var trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
 
+var sync = 0
+var sess_index = 0
+var subject_id = 0
+var block_index = -1
+var trial_index = -1
+var trial_in_block_index = -1
+var version = 1
 %define n_blocks = n_config_repeats * n_configs
 %define n_trials_max = n_cycles * n_cards_max // maximum number of possible trials
 
@@ -79,12 +86,6 @@ group 'Sync variables' {
     var BLOCK_BREAK = 7
 }
 
-var sync = 0
-var sess_index = 0
-var subject_id = 3030
-var block_index = -1
-var trial_index = -1
-var trial_in_block_index = -1
 
 selection selection_trial_index (
     values = 0:n_trials_max

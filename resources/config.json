@@ -5,5 +5,5 @@
   "max_n_pairs": 12,
   "all_n_pairs": [2, 4, 8, 12],
   "n_config_repeats": 10,
-  "n_cycles": 1
+  "n_cycles": 4
 }
