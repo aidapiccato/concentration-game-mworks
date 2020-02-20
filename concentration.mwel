@@ -41,6 +41,7 @@ group 'Configuration variables' {
     var grid = [0, 0, 0, 0]
     var n_images = 4s
     var n_success = 0
+    var cum_success = 0
     var n_ignore = 0
     var n_failure = 0
     var feedback = 1
@@ -207,6 +208,9 @@ protocol 'Run task' {
                 state 'Block break' {
                     report('BLOCK BREAK')
                     sync = BLOCK_BREAK
+                    block_dur = ((block_index + 1) % 4 == 0) * 120s + (!((block_index + 1) % 4 == 0)) * 10s
+                    num_secs = ((block_index + 1) % 4 == 0) * 120 + (!((block_index + 1) % 4 == 0)) * 10
+                    cum_success = cum_success + (n_success/n_trials)
                     display_message ()
                     wait (block_dur)
                     hide_message ()

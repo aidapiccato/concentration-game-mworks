@@ -5,8 +5,10 @@ import json
 
 
 VERSION = 1
-json_path = 'resources/config.json'
-subject_file = '/Users/apiccato/PycharmProjects/concentration/concentration-game-mworks/subjects/%d.pkl' % VERSION
+# dir = ''
+dir = '/Users/apiccato/PycharmProjects/concentration/concentration-game-mworks/'
+json_path = dir + 'resources/config.json'
+
 
 
 with open(json_path) as f:
@@ -44,10 +46,15 @@ def get_block_metaparameters():
 ########################################################################################################################
 
 
+def odd_block(n_pairs):
+    root = np.sqrt(n_pairs * 2)
+    return int(root + 0.5) ** 2 != (n_pairs * 2)
+
 def get_block(subject_id, sess_index, block_index):
     curr_sess = get_session(subject_id, sess_index)
+
     curr_block_n_pairs = curr_sess.blocks[block_index]
-    curr_block = Block(curr_block_n_pairs, subject_id, sess_index, block_index)
+    curr_block = Block(curr_block_n_pairs, subject_id, sess_index, block_index, curr_sess.n_imgs_cum[block_index])
     return curr_block.n_pairs, curr_block.grid, curr_block.grid_dims, curr_block.n_images, curr_block.trials
 
 
@@ -66,21 +73,23 @@ class Session(object):
             np.random.seed(seed + i)
             blocks[block_range] = np.random.permutation(blocks[block_range])
         self.blocks = blocks
+        n_imgs_per_block = np.asarray([block + (odd_block(block)) * 1 for block in blocks])
+        n_imgs_per_block = np.concatenate([[0], n_imgs_per_block])
+        self.n_imgs_cum = np.cumsum(n_imgs_per_block)
+
 
 class Block(object):
-    def __init__(self, n_pairs, subject_id, sess_index, block_index):
+    def __init__(self, n_pairs, subject_id, sess_index, block_index, img_index):
         self.seed = hash((subject_id, sess_index, block_index)) % (2 ** 32 - 1)
         self.n_pairs = n_pairs
-
-        self.grid = np.arange(block_index * (max_n_pairs + 1), (block_index + 1) * (max_n_pairs + 1), step=1)
+        self.n_images = self.n_pairs * 2
+        if odd_block(n_pairs):
+            self.n_images = self.n_images + 1
+        self.grid = np.arange(img_index, img_index + self.n_images, step=1)
         root = np.sqrt(n_pairs * 2)
-        if int(root + 0.5) ** 2 != (n_pairs * 2):
+        if odd_block(n_pairs):
             root = np.sqrt(n_pairs * 2 + 1)
         self.grid_dims = [int(root), int(root)]
-        self.n_images = self.n_pairs * 2
-        if self.grid_dims[0] % 2 != 0:
-            self.n_images = self.n_images + 1
-
         self.grid = np.repeat(self.grid, 2)
         self.grid = self.grid[:self.n_images]
         oddball = self.grid[-1]
