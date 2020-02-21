@@ -59,7 +59,8 @@ image_file card_b_image (
 
 %define src_string = 'images/v' + (string)version + '/sess_' + (string)sess_index
 
-var image_filenames = filenames(src_string + '/*.jpg')
+// var image_filenames = filenames(src_string + '/*.jpg')
+var image_filenames = filenames('curr_images/*.jpg')
 
 %define load_card_a ()
     card_a_image_path = image_filenames[grid[card_a]]
