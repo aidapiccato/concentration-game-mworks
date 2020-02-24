@@ -49,7 +49,7 @@ group 'Configuration variables' {
     var trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
 
-var sync = -1
+var sync = 0
 var sess_index = 0
 var subject_id = 0
 var block_index = -1
@@ -76,7 +76,8 @@ group 'Python variables' {
     var py_card_a = 0
     var py_trials = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
-
+var temp_card_a = 0
+var temp_card_b = 0
 group 'Sync variables' {
     var START_EXPERIMENT = -1
     var ITI = 1
@@ -271,8 +272,7 @@ protocol 'Run task' {
                     )
                 }
                 state 'Trial end' {
-                    sync = TRIAL_END
-
+                    report ("IN TRIAL END for trial $trial_index")
                     unload_card_a ()
                     unload_card_b ()
 
@@ -281,9 +281,10 @@ protocol 'Run task' {
                     n_success = n_success + success
                     n_failure = n_failure + failure
                     n_ignore = n_ignore + ignore
-
+                    temp_card_a = (int)card_a
+                    temp_card_b = (int)card_b
                     refresh_vars_for_sync ()
-
+                    report('$card_a')
                     accept_selections (selection_trial_index)
                     next_selection (selection_trial_index)
 

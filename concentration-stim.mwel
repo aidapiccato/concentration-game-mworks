@@ -238,7 +238,8 @@ var break_start_time = 0
 var num_secs = 5
 
 text break_prompt (
-    text = 'You got ' + (string)(floor((n_success/n_trials)*100)) + '% of trials correct, and your average accuracy is ' + (string)(floor((cum_success/(block_index + 1)*100))) + '%. You will now move on to a new grid. The task will resume in ' + (string)(num_secs - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
+    text = 'You will move on to a new block after a short break'
+    //text = 'You got ' + (string)(floor((n_success/n_trials)*100)) + '% of trials correct, and your average accuracy is ' + (string)(floor((cum_success/(block_index + 1)*100))) + '%. You will now move on to a new grid. The task will resume in ' + (string)(num_secs - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
     // text = 'You can now take a short break, after which you will move on to a new grid. The task will resume in ' + (string)(num_secs - (int)((next_frame_time() - break_start_time)/1s)) + ' seconds.'
     font_name = 'Helvetica Neue'
     font_size = 30
